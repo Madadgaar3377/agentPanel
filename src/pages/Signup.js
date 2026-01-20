@@ -39,7 +39,12 @@ const Signup = () => {
 
     try {
       const { confirmPassword, ...signupData } = formData;
-      const response = await signup(signupData);
+      // Set UserType to "agent" for agent panel signup
+      const signupPayload = {
+        ...signupData,
+        UserType: "agent",
+      };
+      const response = await signup(signupPayload);
       
       if (response.success) {
         toast.success("Account created successfully! Please check your email for verification OTP.");
@@ -62,6 +67,9 @@ const Signup = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary mb-2">MADADGAAR</h1>
           <p className="text-gray-600">Agent Panel - Sign Up</p>
+          <div className="mt-2 inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+            Registering as Agent
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">

@@ -10,6 +10,7 @@ import VerifyAccount from "./pages/VerifyAccount";
 import ForgotPassword from "./pages/ForgotPassword";
 import NewPassword from "./pages/NewPassword";
 import Dashboard from "./pages/Dashboard";
+import AssignmentDetail from "./pages/AssignmentDetail";
 import "./App.css";
 
 function App() {
@@ -27,6 +28,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/assignment/:assignmentId"
+            element={
+              <ProtectedRoute>
+                <AssignmentDetail />
               </ProtectedRoute>
             }
           />
