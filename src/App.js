@@ -11,6 +11,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import NewPassword from "./pages/NewPassword";
 import Dashboard from "./pages/Dashboard";
 import AssignmentDetail from "./pages/AssignmentDetail";
+import CreateInstallment from "./pages/CreateInstallment";
+import InstallmentsList from "./pages/InstallmentsList";
+import InstallmentEdit from "./pages/InstallmentEdit";
 import "./App.css";
 
 function App() {
@@ -36,6 +39,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <AssignmentDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/installments/create"
+            element={
+              <ProtectedRoute>
+                <CreateInstallment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/installments/list"
+            element={
+              <ProtectedRoute>
+                <InstallmentsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/installments/edit/:id"
+            element={
+              <ProtectedRoute>
+                <InstallmentEdit />
               </ProtectedRoute>
             }
           />

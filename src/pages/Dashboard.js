@@ -6,6 +6,7 @@ import { getAgentDashboard, getAgentAssignments } from "../services/agentService
 import StatCard from "../components/StatCard";
 import AssignmentCard from "../components/AssignmentCard";
 import AssignmentFilters from "../components/AssignmentFilters";
+import Navbar from "../components/Navbar";
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -37,12 +38,18 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const response = await getAgentDashboard();
+      console.log("Dashboard Response:", response); // Debug log
       if (response.success) {
         setDashboardData(response.data);
+        // Show stats in console for debugging
+        if (response.data?.statistics) {
+          console.log("Dashboard Statistics:", response.data.statistics);
+        }
       } else {
         toast.error(response.message || "Failed to load dashboard data");
       }
     } catch (error) {
+      console.error("Error fetching dashboard:", error); // Debug log
       toast.error(error.message || "An error occurred");
     } finally {
       setLoading(false);
@@ -53,14 +60,29 @@ const Dashboard = () => {
     try {
       setAssignmentsLoading(true);
       const response = await getAgentAssignments(filters);
+      console.log("Assignments Response:", response); // Debug log
       if (response.success) {
-        setAssignments(response.data || []);
-        setPagination(response.pagination);
+        const assignmentsData = response.data || response.assignments || [];
+        setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
+        setPagination(response.pagination || {
+          total: assignmentsData.length,
+          page: filters.page,
+          limit: filters.limit,
+          totalPages: Math.ceil((assignmentsData.length || 0) / filters.limit)
+        });
+        
+        // Show toast if no assignments found
+        if (assignmentsData.length === 0 && !Object.values(filters).some((f) => f && f !== filters.page && f !== filters.limit)) {
+          toast.info("No assignments found. You'll see assignments here once they are assigned to you.");
+        }
       } else {
         toast.error(response.message || "Failed to load assignments");
+        setAssignments([]);
       }
     } catch (error) {
-      toast.error(error.message || "An error occurred");
+      console.error("Error fetching assignments:", error); // Debug log
+      toast.error(error.message || "An error occurred while loading assignments");
+      setAssignments([]);
     } finally {
       setAssignmentsLoading(false);
     }
@@ -111,28 +133,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-      <nav className="bg-white shadow-md border-b-2 border-primary/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary">MADADGAAR</h1>
-              <span className="ml-4 text-gray-600">Agent Panel</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-semibold text-gray-800">{agentInfo.name || user?.name}</p>
-                <p className="text-xs text-gray-500">{agentInfo.email || user?.email}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
@@ -143,6 +144,7 @@ const Dashboard = () => {
           <p className="text-gray-600 mt-1">Here's your dashboard overview</p>
         </div>
 
+
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
@@ -150,6 +152,7 @@ const Dashboard = () => {
             value={stats.total || 0}
             icon={<span className="text-2xl">📋</span>}
             color="primary"
+            subtitle={stats.total > 0 ? `${assignments.length} currently visible` : "No assignments yet"}
           />
           <StatCard
             title="Pending"
@@ -163,6 +166,7 @@ const Dashboard = () => {
             value={stats.byStatus?.inProgress || 0}
             icon={<span className="text-2xl">🔄</span>}
             color="blue"
+            subtitle="Active work"
           />
           <StatCard
             title="Completed"
@@ -221,18 +225,40 @@ const Dashboard = () => {
             </div>
           ) : assignments.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">No assignments found</p>
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <p className="text-gray-600 text-lg font-semibold">No assignments found</p>
               <p className="text-gray-500 text-sm mt-2">
                 {Object.values(filters).some((f) => f && f !== filters.page && f !== filters.limit)
-                  ? "Try adjusting your filters"
-                  : "You don't have any assignments yet"}
+                  ? "Try adjusting your filters or click Refresh to reload"
+                  : "You don't have any assignments yet. Assignments will appear here once users apply and admin assigns them to you."}
               </p>
+              <button
+                onClick={fetchAssignments}
+                className="mt-4 px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition font-semibold"
+              >
+                Refresh Assignments
+              </button>
             </div>
           ) : (
             <>
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Showing <strong>{assignments.length}</strong> assignment{assignments.length !== 1 ? 's' : ''}
+                  {pagination && pagination.total > assignments.length && (
+                    <span> of <strong>{pagination.total}</strong> total</span>
+                  )}
+                </p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {assignments.map((assignment) => (
-                  <AssignmentCard key={assignment.assignmentId} assignment={assignment} />
+                  <AssignmentCard 
+                    key={assignment.assignmentId || assignment._id || Math.random()} 
+                    assignment={assignment} 
+                  />
                 ))}
               </div>
 

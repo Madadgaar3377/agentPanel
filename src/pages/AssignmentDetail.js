@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAgentAssignmentById } from "../services/agentService";
+import Navbar from "../components/Navbar";
 
 const AssignmentDetail = () => {
   const { assignmentId } = useParams();
@@ -85,22 +86,7 @@ const AssignmentDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-      <nav className="bg-white shadow-md border-b-2 border-primary/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="mr-4 text-gray-600 hover:text-primary"
-              >
-                ← Back
-              </button>
-              <h1 className="text-2xl font-bold text-primary">MADADGAAR</h1>
-              <span className="ml-4 text-gray-600">Assignment Details</span>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Assignment Header */}
