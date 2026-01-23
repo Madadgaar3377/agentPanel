@@ -8,6 +8,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [installmentsDropdownOpen, setInstallmentsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -21,9 +22,34 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+  ];
+
+  const installmentLinks = [
     { path: '/installments/list', label: 'My Installments', icon: '📋' },
     { path: '/installments/create', label: 'Create Installment', icon: '➕' },
   ];
+
+  const isInstallmentActive = () => {
+    return location.pathname.startsWith('/installments');
+  };
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (installmentsDropdownOpen) {
+        const dropdown = document.querySelector('.installments-dropdown');
+        if (dropdown && !dropdown.contains(event.target)) {
+          setInstallmentsDropdownOpen(false);
+        }
+      }
+    };
+    if (installmentsDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [installmentsDropdownOpen]);
 
   return (
     <nav className="bg-white shadow-lg border-b-2 border-primary/20 sticky top-0 z-50">
@@ -53,6 +79,49 @@ const Navbar = () => {
                 <span>{link.label}</span>
               </Link>
             ))}
+            
+            {/* Installments Dropdown */}
+            <div className="relative installments-dropdown">
+              <button
+                onClick={() => setInstallmentsDropdownOpen(!installmentsDropdownOpen)}
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                  isInstallmentActive()
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                }`}
+              >
+                <span>💳</span>
+                <span>Installments</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${installmentsDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {installmentsDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  {installmentLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setInstallmentsDropdownOpen(false)}
+                      className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                        isActive(link.path)
+                          ? 'bg-primary/10 text-primary border-l-4 border-primary'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                      }`}
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* User Info and Actions */}
@@ -121,6 +190,54 @@ const Navbar = () => {
                 <span>{link.label}</span>
               </Link>
             ))}
+            
+            {/* Mobile Installments Section */}
+            <div className="px-4 py-2">
+              <button
+                onClick={() => setInstallmentsDropdownOpen(!installmentsDropdownOpen)}
+                className={`w-full px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-between ${
+                  isInstallmentActive()
+                    ? 'bg-primary text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span>💳</span>
+                  <span>Installments</span>
+                </div>
+                <svg
+                  className={`w-4 h-4 transition-transform ${installmentsDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {installmentsDropdownOpen && (
+                <div className="mt-2 space-y-1 pl-6">
+                  {installmentLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setInstallmentsDropdownOpen(false);
+                      }}
+                      className={`block px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                        isActive(link.path)
+                          ? 'bg-primary/20 text-primary'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

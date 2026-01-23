@@ -51,14 +51,20 @@ const AssignmentCard = ({ assignment }) => {
             </span>
             <span
               className={`px-2 py-1 rounded text-xs font-semibold ${
-                typeColors[assignment.applicationType] || typeColors.unknown
+                typeColors[assignment.applicationType] || 
+                typeColors[assignment.applicationData?.type] || 
+                typeColors.unknown
               }`}
             >
-              {assignment.applicationType?.toUpperCase() || "UNKNOWN"}
+              {(assignment.applicationType || assignment.applicationData?.type || "UNKNOWN").toUpperCase()}
             </span>
           </div>
           <h3 className="text-lg font-semibold text-gray-800 mb-1">
-            {assignment.applicationData?.applicantName || "N/A"}
+            {assignment.applicationData?.applicantName || 
+             assignment.applicationData?.userDetails?.name ||
+             assignment.applicationData?.UserInfo?.[0]?.name ||
+             assignment.applicationData?.applicantInfo?.name ||
+             "N/A"}
           </h3>
           {assignment.category && (
             <p className="text-sm text-gray-600 mb-1">
@@ -76,7 +82,7 @@ const AssignmentCard = ({ assignment }) => {
       {assignment.applicationData && (
         <div className="border-t border-gray-200 pt-3 mt-3">
           <div className="grid grid-cols-2 gap-2 text-sm">
-            {assignment.applicationData.type === "loan" && (
+            {(assignment.applicationData.type === "loan" || assignment.applicationType === "loan") && (
               <>
                 <div>
                   <span className="text-gray-600">Product:</span>{" "}
@@ -94,12 +100,15 @@ const AssignmentCard = ({ assignment }) => {
                 </div>
               </>
             )}
-            {assignment.applicationData.type === "installment" && (
+            {(assignment.applicationData?.type === "installment" || assignment.applicationType === "installment") && (
               <>
                 <div>
                   <span className="text-gray-600">Plan:</span>{" "}
                   <span className="font-medium">
-                    {assignment.applicationData.planName || "N/A"}
+                    {assignment.applicationData.planName || 
+                     assignment.applicationData.planDetails?.productName ||
+                     assignment.applicationData.PlanInfo?.[0]?.productName ||
+                     "N/A"}
                   </span>
                 </div>
                 <div>
@@ -107,12 +116,16 @@ const AssignmentCard = ({ assignment }) => {
                   <span className="font-medium">
                     {assignment.applicationData.totalAmount
                       ? `PKR ${assignment.applicationData.totalAmount.toLocaleString()}`
+                      : assignment.applicationData.planDetails?.price
+                      ? `PKR ${assignment.applicationData.planDetails.price.toLocaleString()}`
+                      : assignment.applicationData.PlanInfo?.[0]?.totalAmount
+                      ? `PKR ${assignment.applicationData.PlanInfo[0].totalAmount.toLocaleString()}`
                       : "N/A"}
                   </span>
                 </div>
               </>
             )}
-            {assignment.applicationData.type === "property" && (
+            {(assignment.applicationData.type === "property" || assignment.applicationType === "property") && (
               <div>
                 <span className="text-gray-600">Type:</span>{" "}
                 <span className="font-medium">

@@ -67,3 +67,11 @@ export const getAgentPerformance = async (period = "all") => {
   const endpoint = period ? `/getAgentPerformance?period=${period}` : "/getAgentPerformance";
   return apiCall(endpoint, "GET");
 };
+
+// Update Assignment Status
+export const updateAssignmentStatus = async (applicationId, status) => {
+  return apiCall("/updateRequestStatus", "POST", {
+    applicationId,
+    status,
+  });
+};
