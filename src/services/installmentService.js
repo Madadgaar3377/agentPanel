@@ -124,3 +124,27 @@ export const uploadImage = async (file) => {
     throw error;
   }
 };
+
+// Get All Installment Applications
+export const getAllApplications = async (filters = {}) => {
+  const { status, page = 1, limit = 50 } = filters;
+  
+  const params = new URLSearchParams();
+  if (status && status !== 'all') params.append("status", status);
+  params.append("page", page);
+  params.append("limit", limit);
+  
+  const queryString = params.toString();
+  const endpoint = queryString ? `/getAllApplications?${queryString}` : `/getAllApplications`;
+  
+  return apiCall(endpoint, "GET");
+};
+
+// Update Application Status
+export const updateApplicationStatus = async (applicationId, status, approvedBy = null) => {
+  return apiCall("/updateApplicationStatus", "PUT", {
+    applicationId,
+    status,
+    approvedBy
+  });
+};

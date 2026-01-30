@@ -145,6 +145,26 @@ const Dashboard = () => {
         </div>
 
 
+        {/* Wallet Balance Card */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-xl shadow-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-red-100 text-sm font-medium mb-1">Wallet Balance</p>
+                <h3 className="text-3xl font-bold">
+                  PKR {agentInfo.walletBalance?.toLocaleString() || user?.walletBalance?.toLocaleString() || '0'}
+                </h3>
+                <p className="text-red-100 text-xs mt-2">Available for withdrawal</p>
+              </div>
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
@@ -245,7 +265,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <>
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
                 <p className="text-sm text-gray-600">
                   Showing <strong>{assignments.length}</strong> assignment{assignments.length !== 1 ? 's' : ''}
                   {pagination && pagination.total > assignments.length && (

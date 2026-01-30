@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { createInstallmentPlan, uploadImage } from '../services/installmentService';
 import { PRODUCT_CATEGORIES, CATEGORY_SPECIFICATIONS, getGroupedCategories } from '../constants/productCategories';
 import Navbar from '../components/Navbar';
+import RichTextEditor from '../components/RichTextEditor';
 
 // Toast Notification Component - Enhanced
 const Toast = ({ message, type, onClose }) => {
@@ -59,6 +60,11 @@ const defaultPlan = {
     interestType: "Flat Rate",
     markup: 0,
     otherChargesNote: "",
+    finance: {
+        bankName: "",
+        financeInfo: "",
+    },
+    hasFinance: false,
 };
 
 const CreateInstallment = () => {
@@ -315,7 +321,7 @@ const CreateInstallment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
+        <div className="min-h-screen bg-gray-50/50">
             <Navbar />
             <div className="max-w-6xl mx-auto p-6 space-y-8">
                 {/* Header Card */}
@@ -325,7 +331,7 @@ const CreateInstallment = () => {
                     </div>
                     <div className="flex gap-3">
                         {[1, 2, 3, 4].map(s => (
-                            <div key={s} className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black transition-all ${step === s ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-110' : (step > s ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400')}`}>
+                            <div key={s} className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black transition-all ${step === s ? 'bg-red-600 text-white shadow-lg shadow-red-200 scale-110' : (step > s ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400')}`}>
                                 {step > s ? '✓' : s}
                             </div>
                         ))}
@@ -339,7 +345,7 @@ const CreateInstallment = () => {
                     <div className="p-10 flex-1">
                         {step === 1 && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-primary pl-4">Step 1: Basic Details</h2>
+                                <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-red-600 pl-4">Step 1: Basic Details</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-4">
                                         <InputField label="Product Name" value={form.productName} onChange={v => updateForm('productName', v)} placeholder="Full product title..." />
@@ -349,13 +355,13 @@ const CreateInstallment = () => {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="flex items-center gap-2 text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">
-                                                <span className="inline-block w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                                                <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                                 Product Category *
                                             </label>
                                             <select 
                                                 value={form.category} 
                                                 onChange={e => handleCategoryChange(e.target.value)} 
-                                                className="w-full px-5 py-4 bg-white border-2 border-gray-200 focus:border-primary focus:bg-primary/5 hover:border-gray-300 rounded-2xl text-sm font-semibold outline-none transition-all appearance-none cursor-pointer shadow-sm focus:shadow-md"
+                                                className="w-full px-5 py-4 bg-white border-2 border-gray-200 focus:border-red-500 focus:bg-red-50/30 hover:border-gray-300 rounded-2xl text-sm font-semibold outline-none transition-all appearance-none cursor-pointer shadow-sm focus:shadow-md"
                                             >
                                                 <option value="">🔍 Select Product Category</option>
                                                 {Object.entries(getGroupedCategories()).map(([group, categories]) => (
@@ -383,7 +389,7 @@ const CreateInstallment = () => {
                                         <InputField label="Company / Brand" value={form.companyName} onChange={v => updateForm('companyName', v)} />
                                         <div className="space-y-1.5">
                                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Description</label>
-                                            <textarea value={form.description} onChange={e => updateForm('description', e.target.value)} rows={4} className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-primary rounded-[2rem] text-sm font-bold outline-none transition-all resize-none shadow-inner" />
+                                            <textarea value={form.description} onChange={e => updateForm('description', e.target.value)} rows={4} className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-red-600 rounded-[2rem] text-sm font-bold outline-none transition-all resize-none shadow-inner" />
                                         </div>
                                     </div>
                                 </div>
@@ -393,11 +399,11 @@ const CreateInstallment = () => {
                         {step === 2 && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-primary pl-4">
+                                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-red-600 pl-4">
                                         Step 2: Product Specifications
                                     </h2>
                                     {form.category && (
-                                        <div className="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-2xl">
+                                        <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-3 rounded-2xl">
                                             <p className="text-xs font-black uppercase tracking-wider">
                                                 {PRODUCT_CATEGORIES.find(c => c.value === form.category)?.label}
                                             </p>
@@ -417,7 +423,7 @@ const CreateInstallment = () => {
                                             <p className="text-gray-400 text-xs font-medium">Please go back to Step 1 and select a product category first.</p>
                                             <button 
                                                 onClick={() => setStep(1)}
-                                                className="mt-4 px-8 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-sm transition-all"
+                                                className="mt-4 px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-all"
                                             >
                                                 ← Back to Step 1
                                             </button>
@@ -431,7 +437,7 @@ const CreateInstallment = () => {
                                                     {spec.type === 'text' || !spec.type ? (
                                                         <div className="space-y-2">
                                                             <label className="flex items-center gap-1.5 text-[10px] font-black text-gray-700 uppercase tracking-wider">
-                                                                {spec.required && <span className="text-primary">*</span>}
+                                                                {spec.required && <span className="text-red-600">*</span>}
                                                                 {spec.field}
                                                             </label>
                                                             <input
@@ -446,7 +452,7 @@ const CreateInstallment = () => {
                                                     ) : spec.type === 'select' ? (
                                                         <div className="space-y-2">
                                                             <label className="flex items-center gap-1.5 text-[10px] font-black text-gray-700 uppercase tracking-wider">
-                                                                {spec.required && <span className="text-primary">*</span>}
+                                                                {spec.required && <span className="text-red-600">*</span>}
                                                                 {spec.field}
                                                             </label>
                                                             <select
@@ -464,7 +470,7 @@ const CreateInstallment = () => {
                                                     ) : spec.type === 'textarea' ? (
                                                         <div className="space-y-2">
                                                             <label className="flex items-center gap-1.5 text-[10px] font-black text-gray-700 uppercase tracking-wider">
-                                                                {spec.required && <span className="text-primary">*</span>}
+                                                                {spec.required && <span className="text-red-600">*</span>}
                                                                 {spec.field}
                                                             </label>
                                                             <textarea
@@ -503,7 +509,7 @@ const CreateInstallment = () => {
 
                         {step === 3 && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-primary pl-4">Step 3: Media Gallery</h2>
+                                <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-red-600 pl-4">Step 3: Media Gallery</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                     <div className="space-y-6">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block pl-1">Image Pipeline</label>
@@ -511,29 +517,29 @@ const CreateInstallment = () => {
                                             {form.productImages.map((url, i) => (
                                                 <div key={i} className="group relative aspect-square rounded-3xl overflow-hidden border-2 border-gray-100 shadow-sm">
                                                     <img src={url} className="w-full h-full object-cover" alt="" />
-                                                    <button onClick={() => updateForm('productImages', form.productImages.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-primary/80 text-white opacity-0 group-hover:opacity-100 transition-all font-black text-[10px]">REMOVE</button>
+                                                    <button onClick={() => updateForm('productImages', form.productImages.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-all font-black text-[10px]">REMOVE</button>
                                                 </div>
                                             ))}
                                             {localImages.map((file, i) => (
                                                 <div key={i} className="relative aspect-square rounded-3xl overflow-hidden border-2 border-dashed border-gray-300 opacity-50 bg-gray-50 flex items-center justify-center p-2">
                                                     <img src={URL.createObjectURL(file)} className="w-full h-full object-contain opacity-30" alt="" />
-                                                    <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div></div>
+                                                    <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping"></div></div>
                                                 </div>
                                             ))}
-                                            <label className="aspect-square rounded-3xl border-4 border-dashed border-gray-100 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center cursor-pointer group">
+                                            <label className="aspect-square rounded-3xl border-4 border-dashed border-gray-100 hover:border-red-600 hover:bg-red-50/30 transition-all flex flex-col items-center justify-center cursor-pointer group">
                                                 <input type="file" multiple className="hidden" onChange={handleFilesChange} />
-                                                <span className="text-3xl text-gray-200 group-hover:text-primary font-light">+</span>
-                                                <span className="text-[8px] font-black text-gray-300 group-hover:text-primary uppercase mt-2">Add Assets</span>
+                                                <span className="text-3xl text-gray-200 group-hover:text-red-600 font-light">+</span>
+                                                <span className="text-[8px] font-black text-gray-300 group-hover:text-red-600 uppercase mt-2">Add Assets</span>
                                             </label>
                                         </div>
                                     </div>
                                     <div className="bg-gray-900 rounded-[3rem] p-10 flex flex-col justify-center items-center text-center space-y-6 shadow-2xl">
-                                        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(229,57,53,0.5)]">
+                                        <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.5)]">
                                             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                         </div>
                                         <h3 className="text-white font-black uppercase tracking-widest text-sm">Asset Processing Hub</h3>
                                         <p className="text-gray-500 text-xs font-bold leading-relaxed">Ensure all images are high-resolution for the client interface.</p>
-                                        <button disabled={!localImages.length || uploading} onClick={handleUploadAll} className="w-full py-5 bg-white text-gray-900 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-primary hover:text-white transition-all disabled:opacity-20">
+                                        <button disabled={!localImages.length || uploading} onClick={handleUploadAll} className="w-full py-5 bg-white text-gray-900 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-red-600 hover:text-white transition-all disabled:opacity-20">
                                             {uploading ? 'Processing Architecture...' : `Commit ${localImages.length} Local Files`}
                                         </button>
                                     </div>
@@ -544,14 +550,14 @@ const CreateInstallment = () => {
                         {step === 4 && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <div className="flex justify-between items-center">
-                                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-primary pl-4">Step 4: Financial </h2>
+                                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-red-600 pl-4">Step 4: Financial </h2>
                                     <div className="flex items-center gap-4 bg-gray-900 px-6 py-3 rounded-2xl shadow-lg border border-gray-800">
                                         <div className="flex flex-col">
                                             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Global Cash Price</span>
                                             <span className="text-lg font-black text-white tracking-tighter">PKR {Number(form.price || 0).toLocaleString()}</span>
                                         </div>
                                         <div className="h-8 w-[1px] bg-gray-700 mx-2"></div>
-                                        <button onClick={() => setForm(f => ({ ...f, paymentPlans: [...f.paymentPlans, { ...defaultPlan }] }))} className="px-5 py-2.5 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">+ Add Logic Tier</button>
+                                        <button onClick={() => setForm(f => ({ ...f, paymentPlans: [...f.paymentPlans, { ...defaultPlan }] }))} className="px-5 py-2.5 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-red-200 hover:scale-105 active:scale-95 transition-all">+ Add Logic Tier</button>
                                     </div>
                                 </div>
                                 <div className="space-y-6">
@@ -617,6 +623,66 @@ const CreateInstallment = () => {
                                                 )}
                                             </div>
 
+                                            {/* Finance Section */}
+                                            <div className="mt-6 pt-6 border-t border-gray-200">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Finance / Bank Information</label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const pp = [...form.paymentPlans];
+                                                            if (!pp[idx].hasFinance) {
+                                                                pp[idx].hasFinance = true;
+                                                                if (!pp[idx].finance) {
+                                                                    pp[idx].finance = { bankName: "", financeInfo: "" };
+                                                                }
+                                                            } else {
+                                                                pp[idx].hasFinance = false;
+                                                            }
+                                                            setForm(f => ({ ...f, paymentPlans: pp }));
+                                                        }}
+                                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                                            p.hasFinance 
+                                                                ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' 
+                                                                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                                        }`}
+                                                    >
+                                                        {p.hasFinance ? '✓ Finance Enabled' : '+ Add Finance'}
+                                                    </button>
+                                                </div>
+                                                
+                                                {p.hasFinance && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                                                        <InputField 
+                                                            label="Bank Name" 
+                                                            value={p.finance?.bankName || ""} 
+                                                            onChange={v => {
+                                                                const pp = [...form.paymentPlans];
+                                                                if (!pp[idx].finance) pp[idx].finance = { bankName: "", financeInfo: "" };
+                                                                pp[idx].finance.bankName = v;
+                                                                setForm(f => ({ ...f, paymentPlans: pp }));
+                                                            }} 
+                                                            placeholder="e.g. HBL, UBL, Meezan Bank" 
+                                                        />
+                                                        <div className="space-y-2">
+                                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Finance Information</label>
+                                                            <div className="border-2 border-transparent rounded-2xl bg-white focus-within:border-red-600 transition-all shadow-sm">
+                                                                <RichTextEditor
+                                                                    value={p.finance?.financeInfo || ""}
+                                                                    onChange={(html) => {
+                                                                        const pp = [...form.paymentPlans];
+                                                                        if (!pp[idx].finance) pp[idx].finance = { bankName: "", financeInfo: "" };
+                                                                        pp[idx].finance.financeInfo = html;
+                                                                        setForm(f => ({ ...f, paymentPlans: pp }));
+                                                                    }}
+                                                                    placeholder="Additional finance details, terms, conditions, etc."
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4 bg-white/50 p-6 rounded-3xl border border-white">
                                                 <SummaryItem label="Monthly Installment (EMI)" value={p.monthlyInstallment} highlight />
                                                 <SummaryItem label="Total Markup Amount" value={p.markup} />
@@ -624,7 +690,7 @@ const CreateInstallment = () => {
                                                 <SummaryItem label="Total Cost to Customer" value={p.totalCostToCustomer} highlight />
                                                 <SummaryItem label="Financed Amount" value={Math.max(0, (parseFloat(form.price) || 0) - (p.downPayment || 0))} border={false} />
                                             </div>
-                                            {form.paymentPlans.length > 1 && <button onClick={() => setForm(f => ({ ...f, paymentPlans: f.paymentPlans.filter((_, i) => i !== idx) }))} className="absolute top-4 right-4 text-gray-300 hover:text-primary transition-colors">✕</button>}
+                                            {form.paymentPlans.length > 1 && <button onClick={() => setForm(f => ({ ...f, paymentPlans: f.paymentPlans.filter((_, i) => i !== idx) }))} className="absolute top-4 right-4 text-gray-300 hover:text-red-600 transition-colors">✕</button>}
                                         </div>
                                     ))}
                                 </div>
@@ -637,9 +703,9 @@ const CreateInstallment = () => {
                         <button onClick={() => setStep(s => Math.max(1, s - 1))} className={`px-10 py-4 font-black uppercase text-[10px] tracking-widest transition-all ${step === 1 ? 'opacity-0 pointer-events-none' : 'text-gray-400 hover:text-gray-900'}`}>Previous Vector</button>
                         <div className="flex gap-4">
                             {step < 4 ?
-                                <button onClick={() => setStep(s => s + 1)} className="px-12 py-4 bg-gray-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-primary shadow-xl shadow-gray-200 transition-all">Next Phase Matrix</button>
+                                <button onClick={() => setStep(s => s + 1)} className="px-12 py-4 bg-gray-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-red-600 shadow-xl shadow-gray-200 transition-all">Next Phase Matrix</button>
                                 :
-                                <button onClick={handleSubmit} disabled={loading} className="px-12 py-4 bg-primary hover:bg-primary-dark text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] shadow-xl shadow-primary/20 transition-all active:scale-95">
+                                <button onClick={handleSubmit} disabled={loading} className="px-12 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] shadow-xl shadow-red-200 transition-all active:scale-95">
                                     {loading ? 'Committing Logic...' : 'Build Enterprise Plan'}
                                 </button>
                             }
@@ -663,14 +729,14 @@ const CreateInstallment = () => {
 // Internal Atomic Components
 const InputField = ({ label, value, onChange, type = "text", placeholder = "", readOnly = false }) => (
     <div className="space-y-2 group">
-        {label && <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-focus-within:text-primary transition-colors pl-1">{label}</label>}
+        {label && <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest group-focus-within:text-red-600 transition-colors pl-1">{label}</label>}
         <input
             type={type}
             value={value}
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
             readOnly={readOnly}
-            className={`w-full px-5 py-3.5 border-2 border-transparent rounded-2xl text-sm font-bold transition-all outline-none shadow-sm placeholder:text-gray-300 ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-gray-50 focus:border-primary focus:bg-white'}`}
+            className={`w-full px-5 py-3.5 border-2 border-transparent rounded-2xl text-sm font-bold transition-all outline-none shadow-sm placeholder:text-gray-300 ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-gray-50 focus:border-red-600 focus:bg-white'}`}
         />
     </div>
 );
@@ -678,7 +744,7 @@ const InputField = ({ label, value, onChange, type = "text", placeholder = "", r
 const SummaryItem = ({ label, value, highlight = false, border = true }) => (
     <div className={`flex flex-col gap-1 ${border ? 'border-r border-gray-100' : ''} px-4`}>
         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{label}</span>
-        <span className={`text-sm font-black tracking-tighter ${highlight ? 'text-primary' : 'text-gray-800'}`}>
+        <span className={`text-sm font-black tracking-tighter ${highlight ? 'text-red-600' : 'text-gray-800'}`}>
             PKR {Number(value || 0).toLocaleString()}
         </span>
     </div>

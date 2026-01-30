@@ -9,6 +9,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [installmentsDropdownOpen, setInstallmentsDropdownOpen] = useState(false);
+  const [propertiesDropdownOpen, setPropertiesDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -22,15 +23,28 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/cases', label: 'My Cases', icon: '💼' },
+    { path: '/commission/tracking', label: 'Commission Tracking', icon: '💰' },
+    { path: '/profile/view', label: 'Profile', icon: '👤' },
   ];
 
   const installmentLinks = [
     { path: '/installments/list', label: 'My Installments', icon: '📋' },
     { path: '/installments/create', label: 'Create Installment', icon: '➕' },
+    { path: '/installments/applications', label: 'Applications', icon: '📝' },
+  ];
+
+  const propertyLinks = [
+    { path: '/property/list', label: 'My Properties', icon: '🏠' },
+    { path: '/property/add', label: 'Add Property', icon: '➕' },
   ];
 
   const isInstallmentActive = () => {
     return location.pathname.startsWith('/installments');
+  };
+
+  const isPropertyActive = () => {
+    return location.pathname.startsWith('/property');
   };
 
   // Close dropdown when clicking outside
@@ -42,23 +56,29 @@ const Navbar = () => {
           setInstallmentsDropdownOpen(false);
         }
       }
+      if (propertiesDropdownOpen) {
+        const dropdown = document.querySelector('.properties-dropdown');
+        if (dropdown && !dropdown.contains(event.target)) {
+          setPropertiesDropdownOpen(false);
+        }
+      }
     };
-    if (installmentsDropdownOpen) {
+    if (installmentsDropdownOpen || propertiesDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [installmentsDropdownOpen]);
+  }, [installmentsDropdownOpen, propertiesDropdownOpen]);
 
   return (
-    <nav className="bg-white shadow-lg border-b-2 border-primary/20 sticky top-0 z-50">
+    <nav className="bg-white shadow-lg border-b-2 border-red-200/20 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold text-primary">MADADGAAR</h1>
+              <h1 className="text-2xl font-bold text-red-600">MADADGAAR</h1>
               <span className="ml-2 text-sm text-gray-600 hidden sm:inline">Agent Panel</span>
             </Link>
           </div>
@@ -71,8 +91,8 @@ const Navbar = () => {
                 to={link.path}
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
                   isActive(link.path)
-                    ? 'bg-primary text-white shadow-md'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
                 }`}
               >
                 <span>{link.icon}</span>
@@ -86,8 +106,8 @@ const Navbar = () => {
                 onClick={() => setInstallmentsDropdownOpen(!installmentsDropdownOpen)}
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
                   isInstallmentActive()
-                    ? 'bg-primary text-white shadow-md'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
                 }`}
               >
                 <span>💳</span>
@@ -111,8 +131,51 @@ const Navbar = () => {
                       onClick={() => setInstallmentsDropdownOpen(false)}
                       className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
                         isActive(link.path)
-                          ? 'bg-primary/10 text-primary border-l-4 border-primary'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                          ? 'bg-red-50 text-red-600 border-l-4 border-red-600'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
+                      }`}
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Properties Dropdown */}
+            <div className="relative properties-dropdown">
+              <button
+                onClick={() => setPropertiesDropdownOpen(!propertiesDropdownOpen)}
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                  isPropertyActive()
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
+                }`}
+              >
+                <span>🏠</span>
+                <span>Properties</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${propertiesDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {propertiesDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  {propertyLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setPropertiesDropdownOpen(false)}
+                      className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                        isActive(link.path)
+                          ? 'bg-red-50 text-red-600 border-l-4 border-red-600'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
                       }`}
                     >
                       <span>{link.icon}</span>
@@ -135,7 +198,7 @@ const Navbar = () => {
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg active:scale-95"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg active:scale-95"
             >
               Logout
             </button>
@@ -227,7 +290,55 @@ const Navbar = () => {
                       }}
                       className={`block px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
                         isActive(link.path)
-                          ? 'bg-primary/20 text-primary'
+                          ? 'bg-red-50 text-red-600'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Properties Section */}
+            <div className="px-4 py-2">
+              <button
+                onClick={() => setPropertiesDropdownOpen(!propertiesDropdownOpen)}
+                className={`w-full px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-between ${
+                  isPropertyActive()
+                    ? 'bg-primary text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span>🏠</span>
+                  <span>Properties</span>
+                </div>
+                <svg
+                  className={`w-4 h-4 transition-transform ${propertiesDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {propertiesDropdownOpen && (
+                <div className="mt-2 space-y-1 pl-6">
+                  {propertyLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setPropertiesDropdownOpen(false);
+                      }}
+                      className={`block px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                        isActive(link.path)
+                          ? 'bg-red-50 text-red-600'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >

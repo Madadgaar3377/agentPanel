@@ -14,6 +14,15 @@ import AssignmentDetail from "./pages/AssignmentDetail";
 import CreateInstallment from "./pages/CreateInstallment";
 import InstallmentsList from "./pages/InstallmentsList";
 import InstallmentEdit from "./pages/InstallmentEdit";
+import PropertyList from "./pages/PropertyList";
+import PropertyAdd from "./pages/PropertyAdd";
+import PropertyView from "./pages/PropertyView";
+import InstallmentApplications from "./pages/InstallmentApplications";
+import Profile from "./pages/Profile";
+import ProfileView from "./pages/ProfileView";
+import CasesList from "./pages/CasesList";
+import CaseDetail from "./pages/CaseDetail";
+import CommissionTracking from "./pages/CommissionTracking";
 import "./App.css";
 
 function App() {
@@ -63,6 +72,86 @@ function App() {
             element={
               <ProtectedRoute>
                 <InstallmentEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/installments/applications"
+            element={
+              <ProtectedRoute>
+                <InstallmentApplications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/property/list"
+            element={
+              <ProtectedRoute>
+                <PropertyList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/property/add"
+            element={
+              <ProtectedRoute>
+                <PropertyAdd />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/property/edit/:id"
+            element={
+              <ProtectedRoute>
+                <PropertyAdd />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/property/view/:id"
+            element={
+              <ProtectedRoute>
+                <PropertyView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/view"
+            element={
+              <ProtectedRoute>
+                <ProfileView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases"
+            element={
+              <ProtectedRoute>
+                <CasesList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cases/detail/:caseId"
+            element={
+              <ProtectedRoute>
+                <CaseDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/commission/tracking"
+            element={
+              <ProtectedRoute>
+                <CommissionTracking />
               </ProtectedRoute>
             }
           />

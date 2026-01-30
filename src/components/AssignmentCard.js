@@ -137,9 +137,33 @@ const AssignmentCard = ({ assignment }) => {
         </div>
       )}
 
+      {/* Commission Info */}
+      {assignment.commissionInfo && (
+        <div className="border-t border-gray-200 pt-3 mt-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-gray-600 font-medium">Commission:</span>
+            <span className="text-sm font-bold text-green-600">
+              PKR {assignment.commissionInfo?.eligibleCommission?.toLocaleString() || "0"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">Status:</span>
+            <span className={`text-xs font-semibold px-2 py-1 rounded ${
+              assignment.commissionInfo?.commissionStatus === "Paid" 
+                ? "bg-green-100 text-green-800"
+                : assignment.commissionInfo?.commissionStatus === "Earned"
+                ? "bg-blue-100 text-blue-800"
+                : "bg-gray-100 text-gray-800"
+            }`}>
+              {assignment.commissionInfo?.commissionStatus || "Not Earned"}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="border-t border-gray-200 pt-3 mt-3 flex items-center justify-between">
         <p className="text-xs text-gray-500">
-          Assigned: {formatDate(assignment.assignedAt)}
+          Assigned: {formatDate(assignment.assignedAt || assignment.assigenAt)}
         </p>
         <button
           className="text-primary hover:text-primary-dark text-sm font-semibold"
