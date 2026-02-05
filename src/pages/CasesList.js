@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar';
-import API_BASE_URL from '../config/api';
+import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
 
 const CasesList = () => {
@@ -34,7 +34,7 @@ const CasesList = () => {
       params.append('limit', filters.limit);
 
       const response = await axios.get(
-        `${API_BASE_URL}/getAgentCases?${params.toString()}`,
+        `${API_BASE_URL}/getAgentAssignments?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -72,13 +72,12 @@ const CasesList = () => {
 
   const getStatusBadgeColor = (status) => {
     const colors = {
-      Received: 'bg-blue-500',
-      'In Progress': 'bg-yellow-500',
-      Verified: 'bg-purple-500',
-      Closed: 'bg-green-500',
-      Rejected: 'bg-red-500',
-      Transferred: 'bg-orange-500',
-      Shared: 'bg-indigo-500',
+      pending: 'bg-blue-500',
+      in_progress: 'bg-yellow-500',
+      approved: 'bg-purple-500',
+      completed: 'bg-green-500',
+      rejected: 'bg-red-500',
+      cancelled: 'bg-orange-500',
     };
     return colors[status] || 'bg-gray-500';
   };
@@ -111,9 +110,9 @@ const CasesList = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">My Cases</h1>
+            <h1 className="text-3xl font-bold text-gray-900">My Assignments</h1>
             <p className="mt-2 text-sm text-gray-600">
-              Manage and track your assigned cases
+              Manage and track your assigned applications
             </p>
           </div>
 
@@ -121,15 +120,15 @@ const CasesList = () => {
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-white rounded-lg shadow p-4">
-                <div className="text-sm font-medium text-gray-500">Total Cases</div>
+                <div className="text-sm font-medium text-gray-500">Total Assignments</div>
                 <div className="mt-1 text-2xl font-semibold text-gray-900">
-                  {stats.totalCases}
+                  {stats.totalAssignments || stats.totalCases || cases.length}
                 </div>
               </div>
               <div className="bg-white rounded-lg shadow p-4">
-                <div className="text-sm font-medium text-gray-500">Closed Cases</div>
+                <div className="text-sm font-medium text-gray-500">Completed</div>
                 <div className="mt-1 text-2xl font-semibold text-green-600">
-                  {stats.closedCases}
+                  {stats.completedAssignments || stats.closedCases || 0}
                 </div>
               </div>
               <div className="bg-white rounded-lg shadow p-4">
@@ -160,13 +159,12 @@ const CasesList = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">All Statuses</option>
-                  <option value="Received">Received</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Verified">Verified</option>
-                  <option value="Closed">Closed</option>
-                  <option value="Rejected">Rejected</option>
-                  <option value="Transferred">Transferred</option>
-                  <option value="Shared">Shared</option>
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="approved">Approved</option>
+                  <option value="completed">Completed</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
               <div>
@@ -208,7 +206,7 @@ const CasesList = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {cases.length === 0 ? (
               <div className="col-span-2 text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500">No cases found</p>
+                <p className="text-gray-500">No assignments found</p>
               </div>
             ) : (
               cases.map((caseItem) => (
@@ -221,32 +219,32 @@ const CasesList = () => {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-2xl">{getCategoryIcon(caseItem.caseCategory)}</span>
+                          <span className="text-2xl">{getCategoryIcon(caseItem.category)}</span>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            {caseItem.caseId}
+                            {caseItem.applicationId}
                           </h3>
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">{caseItem.productName}</p>
+                        <p className="text-sm text-gray-500 mt-1">{caseItem.applicationData?.planName || caseItem.applicationData?.productName || 'N/A'}</p>
                       </div>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getStatusBadgeColor(
-                          caseItem.caseStatus
+                          caseItem.status
                         )}`}
                       >
-                        {caseItem.caseStatus}
+                        {caseItem.status}
                       </span>
                     </div>
 
                     {/* Client Info */}
                     <div className="mb-4 pb-4 border-b border-gray-200">
                       <p className="text-sm text-gray-600">
-                        <strong>Client:</strong> {caseItem.clientName}
+                        <strong>Client:</strong> {caseItem.applicationData?.applicantName || caseItem.applicationData?.contactInfo?.name || 'N/A'}
                       </p>
                       <p className="text-sm text-gray-600">
-                        <strong>Email:</strong> {caseItem.clientEmail}
+                        <strong>Email:</strong> {caseItem.applicationData?.contactInfo?.email || 'N/A'}
                       </p>
                       <p className="text-sm text-gray-600">
-                        <strong>Phone:</strong> {caseItem.clientPhone || 'N/A'}
+                        <strong>Phone:</strong> {caseItem.applicationData?.contactInfo?.phone || 'N/A'}
                       </p>
                     </div>
 
@@ -276,14 +274,13 @@ const CasesList = () => {
 
                     {/* Dates */}
                     <div className="text-xs text-gray-500 mb-4">
-                      <p>Assigned: {new Date(caseItem.assignedAt).toLocaleDateString()}</p>
-                      <p>Last Activity: {new Date(caseItem.lastActivityAt).toLocaleDateString()}</p>
+                      <p>Assigned: {new Date(caseItem.assignedAt || caseItem.createdAt).toLocaleDateString()}</p>
                     </div>
 
                     {/* Actions */}
                     <div className="flex space-x-2">
                       <Link
-                        to={`/cases/detail/${caseItem.caseId}`}
+                        to={`/dashboard/assignment/${caseItem.assignmentId || caseItem._id}`}
                         className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
                       >
                         View Details

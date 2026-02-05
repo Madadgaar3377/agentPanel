@@ -119,22 +119,28 @@ const AssignmentDetail = () => {
     );
   }
 
-  const assignmentData = assignment.assignment || {};
-  const applicationData = assignment.applicationData || {};
-  const applicationType = assignment.applicationType || "unknown";
+  // Handle different response structures
+  const assignmentData = assignment.assignment || assignment || {};
+  const applicationData = assignment.applicationData || assignmentData.applicationData || {};
+  const applicationType = assignment.applicationType || assignmentData.category?.toLowerCase() || "unknown";
+  
+  // Extract all relevant data
+  const commissionInfo = assignmentData.commissionInfo || {};
+  const userInfo = applicationData.UserInfo?.[0] || applicationData.userInfo || applicationData.applicantInfo || {};
+  const planInfo = applicationData.PlanInfo?.[0] || applicationData.planInfo || {};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-6xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Back Button */}
               <button
                 onClick={() => navigate("/dashboard")}
-          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-semibold group"
+          className="mb-4 sm:mb-6 flex items-center gap-2 text-sm sm:text-base text-gray-600 hover:text-primary transition-colors font-semibold group"
         >
           <svg 
-            className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" 
+            className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:-translate-x-1 transition-transform" 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"
@@ -145,19 +151,19 @@ const AssignmentDetail = () => {
               </button>
 
         {/* Assignment Header */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-6 overflow-hidden relative">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 mb-4 sm:mb-6 overflow-hidden relative">
           {/* Decorative gradient */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full -mr-32 -mt-32"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full -mr-16 -mt-16 sm:-mr-32 sm:-mt-32"></div>
           
           <div className="relative">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-              <div>
-                <h2 className="text-3xl font-black text-gray-900 mb-2">Assignment Details</h2>
-                <p className="text-sm text-gray-500">Complete information about this assignment</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 mb-1 sm:mb-2">Assignment Details</h2>
+                <p className="text-xs sm:text-sm text-gray-500">Complete information about this assignment</p>
               </div>
-              <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <span
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border-2 shadow-sm ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold border-2 shadow-sm whitespace-nowrap ${
                 statusColors[assignmentData.status] || statusColors.pending
               }`}
             >
@@ -168,17 +174,18 @@ const AssignmentDetail = () => {
                     setSelectedStatus(assignmentData.status || "pending");
                     setShowStatusModal(true);
                   }}
-                  className="px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary-darker text-white rounded-xl font-bold text-sm transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2"
+                  className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary-darker text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap"
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  Update Status
+                  <span className="hidden xs:inline">Update Status</span>
+                  <span className="xs:hidden">Update</span>
                 </button>
           </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Assignment ID</p>
                 <p className="font-black text-gray-900 text-sm break-all">{assignmentData._id?.toString().slice(-8) || "N/A"}</p>
@@ -276,53 +283,99 @@ const AssignmentDetail = () => {
           </div>
         </div>
 
+        {/* Client/User Information */}
+        {(userInfo.name || userInfo.email || userInfo.phoneNumber) && (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900">Client Information</h3>
+            </div>
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {userInfo.name && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Name</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg break-words">{userInfo.name}</p>
+                </div>
+              )}
+              {userInfo.email && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Email</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg break-all">{userInfo.email}</p>
+                </div>
+              )}
+              {(userInfo.phoneNumber || userInfo.phone || userInfo.mobileNumber) && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Phone</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg">{userInfo.phoneNumber || userInfo.phone || userInfo.mobileNumber}</p>
+                </div>
+              )}
+              {userInfo.cnicNumber && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">CNIC</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg break-words">{userInfo.cnicNumber}</p>
+                </div>
+              )}
+              {userInfo.Address && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100 xs:col-span-2 lg:col-span-1">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Address</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg break-words">{userInfo.Address}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Application Details */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 lg:p-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 sm:w-6 sm:h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-2xl font-black text-gray-900">Application Information</h3>
+            <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900">Application Information</h3>
           </div>
 
           {applicationType === "loan" && applicationData && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Application Type</p>
-                  <p className="font-black text-gray-900 text-lg">Loan Application</p>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Application Type</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg">Loan Application</p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Product Name</p>
-                  <p className="font-black text-gray-900 text-lg">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Product Name</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg break-words">
                     {applicationData.productName || "N/A"}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Bank Name</p>
-                  <p className="font-black text-gray-900 text-lg">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Bank Name</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg break-words">
                     {applicationData.bankName || "N/A"}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Requested Amount</p>
-                  <p className="font-black text-primary text-lg">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Requested Amount</p>
+                  <p className="font-black text-primary text-sm sm:text-base lg:text-lg">
                     {applicationData.loanRequirement?.requestedAmount
                       ? `PKR ${applicationData.loanRequirement.requestedAmount.toLocaleString()}`
                       : "N/A"}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Applicant Name</p>
-                  <p className="font-black text-gray-900 text-lg">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Applicant Name</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg break-words">
                     {applicationData.applicantInfo?.name || "N/A"}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</p>
-                  <p className="font-black text-gray-900 capitalize text-lg">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Status</p>
+                  <p className="font-black text-gray-900 capitalize text-sm sm:text-base lg:text-lg">
                     {applicationData.status || "N/A"}
                   </p>
                 </div>

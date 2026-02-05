@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar';
-import API_BASE_URL from '../config/api';
+import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
 
 const CaseDetail = () => {
@@ -24,7 +24,7 @@ const CaseDetail = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-      const response = await axios.get(`${API_BASE_URL}/getCase/${caseId}`, {
+      const response = await axios.get(`${API_BASE_URL}/getAgentAssignment/${caseId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -32,8 +32,8 @@ const CaseDetail = () => {
         setCaseData(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching case details:', error);
-      toast.error('Failed to fetch case details');
+      console.error('Error fetching assignment details:', error);
+      toast.error('Failed to fetch assignment details');
     } finally {
       setLoading(false);
     }
@@ -44,21 +44,34 @@ const CaseDetail = () => {
       setActionLoading(true);
       const token = localStorage.getItem('authToken');
       
-      const response = await axios.put(
-        `${API_BASE_URL}/updateCaseStatus/${caseId}`,
-        { status: newStatus },
+      // Map case statuses to assignment statuses
+      const statusMap = {
+        'In Progress': 'in_progress',
+        'Verified': 'approved',
+        'Closed': 'completed',
+        'Rejected': 'rejected'
+      };
+      
+      const assignmentStatus = statusMap[newStatus] || newStatus.toLowerCase();
+      
+      const response = await axios.post(
+        `${API_BASE_URL}/updateRequestStatus`,
+        { 
+          applicationId: caseData?.applicationId || caseId,
+          status: assignmentStatus 
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (response.data.success) {
-        toast.success('Case status updated successfully');
+        toast.success('Assignment status updated successfully');
         fetchCaseDetails();
       }
     } catch (error) {
-      console.error('Error updating case status:', error);
-      toast.error('Failed to update case status');
+      console.error('Error updating assignment status:', error);
+      toast.error('Failed to update assignment status');
     } finally {
       setActionLoading(false);
     }
@@ -74,9 +87,13 @@ const CaseDetail = () => {
       setActionLoading(true);
       const token = localStorage.getItem('authToken');
       
+      // Update assignment note via updateRequestStatus or directly update assignment
       const response = await axios.post(
-        `${API_BASE_URL}/addCaseNote/${caseId}`,
-        { note, isInternal: false },
+        `${API_BASE_URL}/updateRequestStatus`,
+        { 
+          applicationId: caseData?.applicationId || caseId,
+          note: note.trim()
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -104,20 +121,24 @@ const CaseDetail = () => {
       const token = localStorage.getItem('authToken');
       
       const response = await axios.post(
-        `${API_BASE_URL}/rejectCase/${caseId}`,
-        { rejectionReason: reason },
+        `${API_BASE_URL}/updateRequestStatus`,
+        { 
+          applicationId: caseData?.applicationId || caseId,
+          status: 'rejected',
+          note: reason
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (response.data.success) {
-        toast.success('Case rejected successfully');
+        toast.success('Assignment rejected successfully');
         fetchCaseDetails();
       }
     } catch (error) {
-      console.error('Error rejecting case:', error);
-      toast.error('Failed to reject case');
+      console.error('Error rejecting assignment:', error);
+      toast.error('Failed to reject assignment');
     } finally {
       setActionLoading(false);
       setShowRejectModal(false);
@@ -140,7 +161,7 @@ const CaseDetail = () => {
       <>
         <Navbar />
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <p className="text-gray-500">Case not found</p>
+          <p className="text-gray-500">Assignment not found</p>
         </div>
       </>
     );
@@ -154,23 +175,23 @@ const CaseDetail = () => {
           {/* Header */}
           <div className="mb-6">
             <button
-              onClick={() => navigate('/cases')}
+              onClick={() => navigate('/dashboard')}
               className="text-blue-600 hover:text-blue-800 mb-2"
             >
-              ← Back to Cases
+              ← Back to Dashboard
             </button>
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-gray-900">Case Details</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Assignment Details</h1>
               <span
                 className={`px-4 py-2 rounded-full text-sm font-medium text-white ${
-                  caseData.caseStatus === 'Closed'
+                  caseData.status === 'completed'
                     ? 'bg-green-500'
-                    : caseData.caseStatus === 'Rejected'
+                    : caseData.status === 'rejected'
                     ? 'bg-red-500'
                     : 'bg-blue-500'
                 }`}
               >
-                {caseData.caseStatus}
+                {caseData.status}
               </span>
             </div>
           </div>
@@ -178,42 +199,40 @@ const CaseDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Case Information */}
+              {/* Assignment Information */}
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Case Information</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Assignment Information</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500">Case ID</p>
-                    <p className="font-medium">{caseData.caseId}</p>
+                    <p className="text-sm text-gray-500">Application ID</p>
+                    <p className="font-medium">{caseData.applicationId}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Category</p>
-                    <p className="font-medium">{caseData.caseCategory}</p>
+                    <p className="font-medium">{caseData.category}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Sub-Category</p>
-                    <p className="font-medium">{caseData.caseSubCategory || 'N/A'}</p>
+                    <p className="text-sm text-gray-500">Status</p>
+                    <p className="font-medium">{caseData.status}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Priority</p>
-                    <p className="font-medium">{caseData.priority}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-sm text-gray-500">Product/Service</p>
-                    <p className="font-medium">{caseData.productName}</p>
+                    <p className="text-sm text-gray-500">City</p>
+                    <p className="font-medium">{caseData.city || 'N/A'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Client Information */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Client Information</h2>
-                <div className="space-y-2">
-                  <p><strong>Name:</strong> {caseData.clientName}</p>
-                  <p><strong>Email:</strong> {caseData.clientEmail}</p>
-                  <p><strong>Phone:</strong> {caseData.clientPhone || 'N/A'}</p>
+              {caseData.applicationData && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Client Information</h2>
+                  <div className="space-y-2">
+                    <p><strong>Name:</strong> {caseData.applicationData.applicantName || caseData.applicationData.contactInfo?.name || 'N/A'}</p>
+                    <p><strong>Email:</strong> {caseData.applicationData.contactInfo?.email || 'N/A'}</p>
+                    <p><strong>Phone:</strong> {caseData.applicationData.contactInfo?.phone || 'N/A'}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Commission Information */}
               <div className="bg-white rounded-lg shadow p-6">
@@ -229,14 +248,14 @@ const CaseDetail = () => {
                     <span className="text-gray-600">Payment Status:</span>
                     <span
                       className={`font-medium ${
-                        caseData.commissionInfo?.commissionPayable === 'Paid'
+                        caseData.commissionInfo?.commissionStatus === 'Paid'
                           ? 'text-green-600'
-                          : caseData.commissionInfo?.commissionPayable === 'Pending'
+                          : caseData.commissionInfo?.commissionStatus === 'Pending'
                           ? 'text-yellow-600'
                           : 'text-gray-600'
                       }`}
                     >
-                      {caseData.commissionInfo?.commissionPayable || 'N/A'}
+                      {caseData.commissionInfo?.commissionStatus || 'N/A'}
                     </span>
                   </div>
                   {caseData.commissionInfo?.commissionBasis && (
@@ -280,16 +299,10 @@ const CaseDetail = () => {
 
                 {/* Notes List */}
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {caseData.notes && caseData.notes.length > 0 ? (
-                    caseData.notes.map((noteItem, index) => (
-                      <div key={index} className="bg-gray-50 p-3 rounded-md">
-                        <p className="text-sm text-gray-800">{noteItem.note}</p>
-                        <div className="mt-2 text-xs text-gray-500">
-                          <span>{noteItem.addedByName}</span> •{' '}
-                          <span>{new Date(noteItem.addedAt).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    ))
+                  {caseData.note ? (
+                    <div className="bg-gray-50 p-3 rounded-md">
+                      <p className="text-sm text-gray-800">{caseData.note}</p>
+                    </div>
                   ) : (
                     <p className="text-sm text-gray-500">No notes yet</p>
                   )}
@@ -303,49 +316,49 @@ const CaseDetail = () => {
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Update Status</h3>
                 <div className="space-y-2">
-                  {caseData.caseStatus === 'Received' && (
+                  {caseData.status === 'pending' && (
                     <button
-                      onClick={() => handleUpdateStatus('In Progress')}
+                      onClick={() => handleUpdateStatus('in_progress')}
                       disabled={actionLoading}
                       className="w-full px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50"
                     >
                       Start Working
                     </button>
                   )}
-                  {caseData.caseStatus === 'In Progress' && (
+                  {caseData.status === 'in_progress' && (
                     <>
                       <button
-                        onClick={() => handleUpdateStatus('Verified')}
+                        onClick={() => handleUpdateStatus('approved')}
                         disabled={actionLoading}
                         className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
                       >
-                        Mark Verified
+                        Mark Approved
                       </button>
                       <button
-                        onClick={() => handleUpdateStatus('Closed')}
+                        onClick={() => handleUpdateStatus('completed')}
                         disabled={actionLoading}
                         className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
                       >
-                        Close Case
+                        Mark Completed
                       </button>
                     </>
                   )}
-                  {caseData.caseStatus === 'Verified' && (
+                  {caseData.status === 'approved' && (
                     <button
-                      onClick={() => handleUpdateStatus('Closed')}
+                      onClick={() => handleUpdateStatus('completed')}
                       disabled={actionLoading}
                       className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
                     >
-                      Close Case
+                      Mark Completed
                     </button>
                   )}
-                  {!['Rejected', 'Closed'].includes(caseData.caseStatus) && (
+                  {!['rejected', 'completed', 'cancelled'].includes(caseData.status) && (
                     <button
                       onClick={handleRejectCase}
                       disabled={actionLoading}
                       className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
                     >
-                      Reject Case
+                      Reject Assignment
                     </button>
                   )}
                 </div>
@@ -357,44 +370,14 @@ const CaseDetail = () => {
                 <div className="space-y-2 text-sm">
                   <p>
                     <strong>Assigned:</strong>{' '}
-                    {new Date(caseData.assignedAt).toLocaleString()}
+                    {new Date(caseData.assigenAt || caseData.createdAt).toLocaleString()}
                   </p>
                   <p>
-                    <strong>Last Activity:</strong>{' '}
-                    {new Date(caseData.lastActivityAt).toLocaleString()}
+                    <strong>Updated:</strong>{' '}
+                    {new Date(caseData.updatedAt).toLocaleString()}
                   </p>
-                  {caseData.closedAt && (
-                    <p>
-                      <strong>Closed:</strong>{' '}
-                      {new Date(caseData.closedAt).toLocaleString()}
-                    </p>
-                  )}
                 </div>
               </div>
-
-              {/* Partner Info */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Partner</h3>
-                <p className="text-sm">{caseData.partnerName}</p>
-              </div>
-
-              {/* Client Feedback */}
-              {caseData.clientFeedback && (
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Client Feedback</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <span className="text-yellow-400 text-xl">
-                        {'★'.repeat(caseData.clientFeedback.rating)}
-                        {'☆'.repeat(5 - caseData.clientFeedback.rating)}
-                      </span>
-                    </div>
-                    {caseData.clientFeedback.comment && (
-                      <p className="text-sm text-gray-600">{caseData.clientFeedback.comment}</p>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -404,3 +387,4 @@ const CaseDetail = () => {
 };
 
 export default CaseDetail;
+

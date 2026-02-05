@@ -57,9 +57,40 @@ export const getAgentAssignments = async (filters = {}) => {
   return apiCall(endpoint, "GET");
 };
 
-// Get Single Assignment by ID
+// Get Single Assignment by ID (can be assignment _id or applicationId)
 export const getAgentAssignmentById = async (assignmentId) => {
-  return apiCall(`/getAgentAssignment/${assignmentId}`, "GET");
+  // First try to get assignment by _id (assignment ID)
+  try {
+    const result = await apiCall(`/getAgentAssignment/${assignmentId}`, "GET");
+    if (result.success) {
+      return result;
+    }
+  } catch (error) {
+    console.log("Assignment by ID failed, trying by applicationId...");
+  }
+  
+  // Fallback: if assignmentId is actually an applicationId, find assignment first
+  try {
+    const allAssignments = await apiCall("/getRequestsByUserId", "GET");
+    if (allAssignments.success && Array.isArray(allAssignments.data)) {
+      // Find assignment by applicationId
+      const assignment = allAssignments.data.find(
+        (a) => a.applicationId === assignmentId || a._id === assignmentId
+      );
+      
+      if (assignment && assignment._id) {
+        // Now get full details using assignment _id
+        const result = await apiCall(`/getAgentAssignment/${assignment._id}`, "GET");
+        if (result.success) {
+          return result;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching assignment:", error);
+  }
+  
+  throw new Error("Assignment not found");
 };
 
 // Get Agent Performance Statistics

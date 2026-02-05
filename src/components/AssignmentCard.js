@@ -30,27 +30,35 @@ const AssignmentCard = ({ assignment }) => {
     });
   };
 
-  const handleViewDetails = () => {
-    navigate(`/dashboard/assignment/${assignment.assignmentId}`);
+  const handleViewDetails = (e) => {
+    e?.stopPropagation();
+    // Use _id (assignment ID) first, then applicationId, then assignmentId
+    // The backend endpoint expects assignment _id
+    const assignmentId = assignment._id || assignment.assignmentId || assignment.applicationId;
+    if (assignmentId) {
+      navigate(`/dashboard/assignment/${assignmentId}`);
+    } else {
+      console.error("No assignment ID found", assignment);
+    }
   };
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md p-5 border border-gray-200 hover:shadow-lg transition-all cursor-pointer"
+      className="bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer border border-gray-200 p-4 sm:p-5"
       onClick={handleViewDetails}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <span
-              className={`px-2 py-1 rounded text-xs font-semibold border ${
+              className={`px-2 sm:px-2.5 py-1 rounded text-xs font-semibold border whitespace-nowrap ${
                 statusColors[assignment.status] || statusColors.pending
               }`}
             >
               {assignment.status?.replace("_", " ").toUpperCase() || "PENDING"}
             </span>
             <span
-              className={`px-2 py-1 rounded text-xs font-semibold ${
+              className={`px-2 sm:px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap ${
                 typeColors[assignment.applicationType] || 
                 typeColors[assignment.applicationData?.type] || 
                 typeColors.unknown
@@ -59,7 +67,7 @@ const AssignmentCard = ({ assignment }) => {
               {(assignment.applicationType || assignment.applicationData?.type || "UNKNOWN").toUpperCase()}
             </span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-1">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 truncate">
             {assignment.applicationData?.applicantName || 
              assignment.applicationData?.userDetails?.name ||
              assignment.applicationData?.UserInfo?.[0]?.name ||
@@ -67,12 +75,12 @@ const AssignmentCard = ({ assignment }) => {
              "N/A"}
           </h3>
           {assignment.category && (
-            <p className="text-sm text-gray-600 mb-1">
+            <p className="text-xs sm:text-sm text-gray-600 mb-1">
               <span className="font-medium">Category:</span> {assignment.category}
             </p>
           )}
           {assignment.city && (
-            <p className="text-sm text-gray-600 mb-1">
+            <p className="text-xs sm:text-sm text-gray-600 mb-1">
               <span className="font-medium">City:</span> {assignment.city}
             </p>
           )}
@@ -81,7 +89,7 @@ const AssignmentCard = ({ assignment }) => {
 
       {assignment.applicationData && (
         <div className="border-t border-gray-200 pt-3 mt-3">
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
             {(assignment.applicationData.type === "loan" || assignment.applicationType === "loan") && (
               <>
                 <div>
@@ -140,15 +148,15 @@ const AssignmentCard = ({ assignment }) => {
       {/* Commission Info */}
       {assignment.commissionInfo && (
         <div className="border-t border-gray-200 pt-3 mt-3">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-1 xs:gap-2 mb-2">
             <span className="text-xs text-gray-600 font-medium">Commission:</span>
-            <span className="text-sm font-bold text-green-600">
+            <span className="text-xs sm:text-sm font-bold text-green-600">
               PKR {assignment.commissionInfo?.eligibleCommission?.toLocaleString() || "0"}
             </span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-1 xs:gap-2">
             <span className="text-xs text-gray-500">Status:</span>
-            <span className={`text-xs font-semibold px-2 py-1 rounded ${
+            <span className={`text-xs font-semibold px-2 py-1 rounded whitespace-nowrap ${
               assignment.commissionInfo?.commissionStatus === "Paid" 
                 ? "bg-green-100 text-green-800"
                 : assignment.commissionInfo?.commissionStatus === "Earned"
@@ -161,12 +169,12 @@ const AssignmentCard = ({ assignment }) => {
         </div>
       )}
 
-      <div className="border-t border-gray-200 pt-3 mt-3 flex items-center justify-between">
+      <div className="border-t border-gray-200 pt-3 mt-3 flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
         <p className="text-xs text-gray-500">
           Assigned: {formatDate(assignment.assignedAt || assignment.assigenAt)}
         </p>
         <button
-          className="text-primary hover:text-primary-dark text-sm font-semibold"
+          className="text-primary hover:text-primary-dark text-xs sm:text-sm font-semibold whitespace-nowrap self-start xs:self-auto"
           onClick={(e) => {
             e.stopPropagation();
             handleViewDetails();

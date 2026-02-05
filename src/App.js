@@ -156,6 +156,8 @@ function App() {
             }
           />
           <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* Catch-all route - redirect to login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
         <ToastContainer
           position="top-right"

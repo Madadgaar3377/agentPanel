@@ -22,8 +22,7 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/cases', label: 'My Cases', icon: '💼' },
+    { path: '/dashboard', label: 'Assignments', icon: '📋' },
     { path: '/commission/tracking', label: 'Commission Tracking', icon: '💰' },
     { path: '/profile/view', label: 'Profile', icon: '👤' },
   ];
@@ -73,13 +72,13 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-lg border-b-2 border-red-200/20 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-4">
-            <Link to="/dashboard" className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold text-red-600">MADADGAAR</h1>
-              <span className="ml-2 text-sm text-gray-600 hidden sm:inline">Agent Panel</span>
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+            <Link to="/dashboard" className="flex items-center space-x-1 sm:space-x-2 min-w-0">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 truncate">MADADGAAR</h1>
+              <span className="ml-1 sm:ml-2 text-xs sm:text-sm text-gray-600 hidden sm:inline whitespace-nowrap">Agent Panel</span>
             </Link>
           </div>
 
