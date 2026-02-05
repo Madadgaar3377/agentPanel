@@ -9,7 +9,7 @@ import AssignmentFilters from "../components/AssignmentFilters";
 import Navbar from "../components/Navbar";
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState(null);
   const [assignments, setAssignments] = useState([]);
@@ -79,6 +79,21 @@ const Dashboard = () => {
     }
   }, [filters]);
 
+  useEffect(() => {
+    // Only fetch data if auth is not loading and user is available
+    if (!authLoading && user) {
+      fetchDashboardData();
+      fetchAssignments();
+    }
+  }, [authLoading, user, fetchDashboardData, fetchAssignments]);
+
+  useEffect(() => {
+    // Only fetch assignments when filters change (if auth is not loading)
+    if (!authLoading) {
+      fetchAssignments();
+    }
+  }, [filters.status, filters.category, filters.city, filters.type, filters.page, fetchAssignments, authLoading]);
+
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({
       ...prev,
@@ -108,7 +123,8 @@ const Dashboard = () => {
   //   navigate("/login");
   // };
 
-  if (loading) {
+  // Show loading if auth is loading or dashboard data is loading
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center">
         <div className="text-center">
