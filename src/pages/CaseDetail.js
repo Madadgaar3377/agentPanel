@@ -141,7 +141,6 @@ const CaseDetail = () => {
       toast.error('Failed to reject assignment');
     } finally {
       setActionLoading(false);
-      setShowRejectModal(false);
     }
   };
 

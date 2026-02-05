@@ -9,16 +9,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     removeAuthToken();
     setUser(null);
     setIsAuthenticated(false);
     setLoading(false);
-  };
+  }, []);
 
-  const fetchUser = useCallback(async () => {
+  const fetchUser = useCallback(async (skipLoading = false) => {
     try {
-      setLoading(true);
+      if (!skipLoading) {
+        setLoading(true);
+      }
       const response = await getUserById();
       if (response.success) {
         const userData = response.user || response.data;
@@ -38,11 +40,16 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error fetching user:", error);
-      logout();
+      // Only logout if we're not in background refresh mode
+      if (!skipLoading) {
+        logout();
+      }
     } finally {
-      setLoading(false);
+      if (!skipLoading) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [logout]);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -54,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [fetchUser]);
 
-  const login = (token, userData = null) => {
+  const login = useCallback((token, userData = null) => {
     setAuthToken(token);
     if (userData) {
       // Check if user type is agent before setting user
@@ -70,14 +77,14 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       // Optionally fetch fresh user data in background (non-blocking, doesn't affect loading state)
       setTimeout(() => {
-        fetchUser().catch(err => console.error("Background user fetch failed:", err));
+        fetchUser(true).catch(err => console.error("Background user fetch failed:", err));
       }, 100);
     } else {
       // No userData provided, fetch it
       setIsAuthenticated(true);
-      fetchUser();
+      fetchUser(false);
     }
-  };
+  }, [fetchUser]);
 
 
   const value = {

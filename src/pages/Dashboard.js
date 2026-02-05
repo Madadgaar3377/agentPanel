@@ -28,20 +28,34 @@ const Dashboard = () => {
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("Fetching dashboard data...");
       const response = await getAgentDashboard();
       console.log("Dashboard Response:", response); // Debug log
-      if (response.success) {
-        setDashboardData(response.data);
+      if (response && response.success) {
+        setDashboardData(response.data || response);
         // Show stats in console for debugging
         if (response.data?.statistics) {
           console.log("Dashboard Statistics:", response.data.statistics);
         }
       } else {
-        toast.error(response.message || "Failed to load dashboard data");
+        const errorMsg = response?.message || "Failed to load dashboard data";
+        console.error("Dashboard API error:", errorMsg);
+        toast.error(errorMsg);
+        // Set empty dashboard data to prevent infinite loading
+        setDashboardData({
+          statistics: {},
+          agentInfo: {},
+        });
       }
     } catch (error) {
       console.error("Error fetching dashboard:", error); // Debug log
-      toast.error(error.message || "An error occurred");
+      const errorMsg = error.message || "An error occurred while loading dashboard";
+      toast.error(errorMsg);
+      // Set empty dashboard data to prevent infinite loading
+      setDashboardData({
+        statistics: {},
+        agentInfo: {},
+      });
     } finally {
       setLoading(false);
     }
@@ -82,17 +96,20 @@ const Dashboard = () => {
   useEffect(() => {
     // Only fetch data if auth is not loading and user is available
     if (!authLoading && user) {
+      console.log("Fetching dashboard data...", { authLoading, hasUser: !!user });
       fetchDashboardData();
       fetchAssignments();
+    } else {
+      console.log("Waiting for auth...", { authLoading, hasUser: !!user });
     }
   }, [authLoading, user, fetchDashboardData, fetchAssignments]);
 
   useEffect(() => {
-    // Only fetch assignments when filters change (if auth is not loading)
-    if (!authLoading) {
+    // Only fetch assignments when filters change (if auth is not loading and user is available)
+    if (!authLoading && user) {
       fetchAssignments();
     }
-  }, [filters.status, filters.category, filters.city, filters.type, filters.page, fetchAssignments, authLoading]);
+  }, [filters.status, filters.category, filters.city, filters.type, filters.page, fetchAssignments, authLoading, user]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({
@@ -123,8 +140,8 @@ const Dashboard = () => {
   //   navigate("/login");
   // };
 
-  // Show loading if auth is loading or dashboard data is loading
-  if (authLoading || loading) {
+  // Show loading if auth is loading
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center">
         <div className="text-center">
@@ -135,8 +152,56 @@ const Dashboard = () => {
     );
   }
 
-  const stats = dashboardData?.statistics || {};
-  const agentInfo = dashboardData?.agentInfo || {};
+  // Show loading if user is not available (shouldn't happen due to ProtectedRoute, but just in case)
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="mt-4 text-gray-600">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading if dashboard data is still loading (but user is authenticated)
+  if (loading && !dashboardData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Initialize with defaults if dashboardData is not available
+  const stats = dashboardData?.statistics || {
+    total: 0,
+    byStatus: {
+      pending: 0,
+      inProgress: 0,
+      approved: 0,
+      rejected: 0,
+      cancelled: 0,
+      completed: 0,
+    },
+    recent: {
+      today: 0,
+      thisWeek: 0,
+      thisMonth: 0,
+    },
+    performance: {
+      completionRate: 0,
+      totalCompleted: 0,
+      totalRejected: 0,
+    },
+  };
+  const agentInfo = dashboardData?.agentInfo || {
+    name: user?.name || "Agent",
+    walletBalance: user?.walletBalance || 0,
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
