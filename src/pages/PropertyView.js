@@ -24,7 +24,11 @@ const PropertyView = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchProperty();
+    }, [fetchProperty]);
 
     if (loading) {
         return (

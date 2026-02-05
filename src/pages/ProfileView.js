@@ -92,9 +92,9 @@ const ProfileView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchWalletBalance = async () => {
+  const fetchWalletBalance = useCallback(async () => {
     try {
       const response = await getAgentDashboard();
       if (response.success && response.data?.agentInfo?.walletBalance !== undefined) {
@@ -103,7 +103,12 @@ const ProfileView = () => {
     } catch (error) {
       console.error("Error fetching wallet balance:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProfileData();
+    fetchWalletBalance();
+  }, [fetchProfileData, fetchWalletBalance]);
 
   if (loading) {
     return (

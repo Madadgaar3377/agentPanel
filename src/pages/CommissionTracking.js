@@ -19,32 +19,6 @@ const CommissionTracking = () => {
   const [totalPaid, setTotalPaid] = useState(0);
 
   const fetchAssignments = useCallback(async () => {
-    // Calculate totals
-    let earned = 0;
-    let pending = 0;
-    let paid = 0;
-
-    assignments.forEach((item) => {
-      const commission = item.commissionInfo?.eligibleCommission || 0;
-      const status = item.commissionInfo?.commissionStatus || "Not Earned";
-
-      if (status === "Earned" || status === "Pending" || status === "Paid") {
-        earned += commission;
-      }
-      if (status === "Pending") {
-        pending += commission;
-      }
-      if (status === "Paid") {
-        paid += commission;
-      }
-    });
-
-    setTotalEarned(earned);
-    setTotalPending(pending);
-    setTotalPaid(paid);
-  }, [assignments]);
-
-  const fetchAssignments = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("agentToken");
@@ -73,6 +47,32 @@ const CommissionTracking = () => {
       setLoading(false);
     }
   }, [filters, navigate]);
+
+  // Calculate totals when assignments change
+  useEffect(() => {
+    let earned = 0;
+    let pending = 0;
+    let paid = 0;
+
+    assignments.forEach((item) => {
+      const commission = item.commissionInfo?.eligibleCommission || 0;
+      const status = item.commissionInfo?.commissionStatus || "Not Earned";
+
+      if (status === "Earned" || status === "Pending" || status === "Paid") {
+        earned += commission;
+      }
+      if (status === "Pending") {
+        pending += commission;
+      }
+      if (status === "Paid") {
+        paid += commission;
+      }
+    });
+
+    setTotalEarned(earned);
+    setTotalPending(pending);
+    setTotalPaid(paid);
+  }, [assignments]);
 
   useEffect(() => {
     fetchAssignments();

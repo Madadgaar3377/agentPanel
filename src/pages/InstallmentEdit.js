@@ -164,7 +164,11 @@ const InstallmentEdit = () => {
         } finally {
             setFetching(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        if (id) fetchExistingPlan();
+    }, [id, fetchExistingPlan]);
 
     // Helper to update nested path safely
     const updateForm = (path, value) => {

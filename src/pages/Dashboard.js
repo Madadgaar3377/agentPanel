@@ -45,9 +45,9 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = useCallback(async () => {
     try {
       setAssignmentsLoading(true);
       const response = await getAgentAssignments(filters);
@@ -77,7 +77,7 @@ const Dashboard = () => {
     } finally {
       setAssignmentsLoading(false);
     }
-  };
+  }, [filters]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({

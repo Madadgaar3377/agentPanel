@@ -97,7 +97,11 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProfileData();
+  }, [fetchProfileData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
