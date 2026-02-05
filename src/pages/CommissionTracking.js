@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
@@ -18,11 +18,7 @@ const CommissionTracking = () => {
   const [totalPending, setTotalPending] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
 
-  useEffect(() => {
-    fetchAssignments();
-  }, [filters]);
-
-  useEffect(() => {
+  const fetchAssignments = useCallback(async () => {
     // Calculate totals
     let earned = 0;
     let pending = 0;
@@ -76,7 +72,11 @@ const CommissionTracking = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, navigate]);
+
+  useEffect(() => {
+    fetchAssignments();
+  }, [fetchAssignments]);
 
   const getCommissionStatusColor = (status) => {
     const colors = {

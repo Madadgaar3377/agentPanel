@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getInstallmentById, updateInstallmentPlan, uploadImage } from '../services/installmentService';
@@ -112,11 +112,7 @@ const InstallmentEdit = () => {
         },
     });
 
-    useEffect(() => {
-        if (id) fetchExistingPlan();
-    }, [id]);
-
-    const fetchExistingPlan = async () => {
+    const fetchExistingPlan = useCallback(async () => {
         setFetching(true);
         try {
             const response = await getInstallmentById(id);

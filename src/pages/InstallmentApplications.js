@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
@@ -7,7 +7,7 @@ import Navbar from '../components/Navbar';
 
 const InstallmentApplications = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -20,11 +20,7 @@ const InstallmentApplications = () => {
     const [showViewModal, setShowViewModal] = useState(false);
     const [viewingApplication, setViewingApplication] = useState(null);
 
-    useEffect(() => {
-        fetchApplications();
-    }, [statusFilter]);
-
-    const fetchApplications = async () => {
+    const fetchApplications = useCallback(async () => {
         setLoading(true);
         try {
             const response = await getAllApplications({
@@ -44,7 +40,11 @@ const InstallmentApplications = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [statusFilter]);
+
+    useEffect(() => {
+        fetchApplications();
+    }, [fetchApplications]);
 
     const handleUpdateStatus = async () => {
         if (!selectedApplication || !newStatus) {

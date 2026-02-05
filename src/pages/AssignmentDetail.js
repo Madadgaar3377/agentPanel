@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAgentAssignmentById, updateAssignmentStatus } from "../services/agentService";
@@ -13,11 +13,7 @@ const AssignmentDetail = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
 
-  useEffect(() => {
-    fetchAssignmentDetails();
-  }, [assignmentId]);
-
-  const fetchAssignmentDetails = async () => {
+  const fetchAssignmentDetails = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getAgentAssignmentById(assignmentId);
@@ -33,7 +29,11 @@ const AssignmentDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [assignmentId, navigate]);
+
+  useEffect(() => {
+    fetchAssignmentDetails();
+  }, [fetchAssignmentDetails]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -125,9 +125,9 @@ const AssignmentDetail = () => {
   const applicationType = assignment.applicationType || assignmentData.category?.toLowerCase() || "unknown";
   
   // Extract all relevant data
-  const commissionInfo = assignmentData.commissionInfo || {};
+  // const commissionInfo = assignmentData.commissionInfo || {};
   const userInfo = applicationData.UserInfo?.[0] || applicationData.userInfo || applicationData.applicantInfo || {};
-  const planInfo = applicationData.PlanInfo?.[0] || applicationData.planInfo || {};
+  // const planInfo = applicationData.PlanInfo?.[0] || applicationData.planInfo || {};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">

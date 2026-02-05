@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar';
@@ -17,12 +17,7 @@ const CasesList = () => {
   const [pagination, setPagination] = useState({});
   const [stats, setStats] = useState(null);
 
-  useEffect(() => {
-    fetchCases();
-    fetchPerformanceStats();
-  }, [filters]);
-
-  const fetchCases = async () => {
+  const fetchCases = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
@@ -50,9 +45,9 @@ const CasesList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const fetchPerformanceStats = async () => {
+  const fetchPerformanceStats = useCallback(async () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await axios.get(
@@ -68,7 +63,12 @@ const CasesList = () => {
     } catch (error) {
       console.error('Error fetching performance stats:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCases();
+    fetchPerformanceStats();
+  }, [fetchCases, fetchPerformanceStats]);
 
   const getStatusBadgeColor = (status) => {
     const colors = {

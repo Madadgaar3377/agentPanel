@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -25,16 +25,7 @@ const Dashboard = () => {
   });
   const [pagination, setPagination] = useState(null);
 
-  useEffect(() => {
-    fetchDashboardData();
-    fetchAssignments();
-  }, []);
-
-  useEffect(() => {
-    fetchAssignments();
-  }, [filters.status, filters.category, filters.city, filters.type, filters.page]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getAgentDashboard();
@@ -111,11 +102,11 @@ const Dashboard = () => {
     setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
-  const handleLogout = () => {
-    logout();
-    toast.info("Logged out successfully");
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   logout();
+  //   toast.info("Logged out successfully");
+  //   navigate("/login");
+  // };
 
   if (loading) {
     return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar';
@@ -12,15 +12,11 @@ const CaseDetail = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [note, setNote] = useState('');
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [showTransferModal, setShowTransferModal] = useState(false);
-  const [showRejectModal, setShowRejectModal] = useState(false);
+  // const [showShareModal, setShowShareModal] = useState(false);
+  // const [showTransferModal, setShowTransferModal] = useState(false);
+  // const [showRejectModal, setShowRejectModal] = useState(false);
 
-  useEffect(() => {
-    fetchCaseDetails();
-  }, [caseId]);
-
-  const fetchCaseDetails = async () => {
+  const fetchCaseDetails = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
@@ -37,7 +33,11 @@ const CaseDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [caseId]);
+
+  useEffect(() => {
+    fetchCaseDetails();
+  }, [fetchCaseDetails]);
 
   const handleUpdateStatus = async (newStatus) => {
     try {

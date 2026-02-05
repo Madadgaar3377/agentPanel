@@ -10,11 +10,7 @@ const PropertyView = () => {
     const [property, setProperty] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchProperty();
-    }, [id]);
-
-    const fetchProperty = async () => {
+    const fetchProperty = useCallback(async () => {
         setLoading(true);
         try {
             const response = await getPropertyById(id);
