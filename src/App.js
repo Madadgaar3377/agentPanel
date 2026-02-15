@@ -23,6 +23,7 @@ import ProfileView from "./pages/ProfileView";
 import CasesList from "./pages/CasesList";
 import CaseDetail from "./pages/CaseDetail";
 import CommissionTracking from "./pages/CommissionTracking";
+import InsurancePlanList from "./pages/InsurancePlanList";
 import "./App.css";
 
 function App() {
@@ -152,6 +153,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <CommissionTracking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insurance/list"
+            element={
+              <ProtectedRoute>
+                <InsurancePlanList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insurance/create"
+            element={
+              <ProtectedRoute>
+                <InsurancePlanList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insurance/edit/:id"
+            element={
+              <ProtectedRoute>
+                <InsurancePlanList />
               </ProtectedRoute>
             }
           />

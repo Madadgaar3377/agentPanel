@@ -10,6 +10,7 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [installmentsDropdownOpen, setInstallmentsDropdownOpen] = useState(false);
   const [propertiesDropdownOpen, setPropertiesDropdownOpen] = useState(false);
+  const [insuranceDropdownOpen, setInsuranceDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -38,12 +39,21 @@ const Navbar = () => {
     { path: '/property/add', label: 'Add Property', icon: '➕' },
   ];
 
+  const insuranceLinks = [
+    { path: '/insurance/list', label: 'My Insurance Plans', icon: '🛡️' },
+    { path: '/insurance/create', label: 'Create Plan', icon: '➕' },
+  ];
+
   const isInstallmentActive = () => {
     return location.pathname.startsWith('/installments');
   };
 
   const isPropertyActive = () => {
     return location.pathname.startsWith('/property');
+  };
+
+  const isInsuranceActive = () => {
+    return location.pathname.startsWith('/insurance');
   };
 
   // Close dropdown when clicking outside
@@ -59,6 +69,12 @@ const Navbar = () => {
         const dropdown = document.querySelector('.properties-dropdown');
         if (dropdown && !dropdown.contains(event.target)) {
           setPropertiesDropdownOpen(false);
+        }
+      }
+      if (insuranceDropdownOpen) {
+        const dropdown = document.querySelector('.insurance-dropdown');
+        if (dropdown && !dropdown.contains(event.target)) {
+          setInsuranceDropdownOpen(false);
         }
       }
     };
@@ -171,6 +187,49 @@ const Navbar = () => {
                       key={link.path}
                       to={link.path}
                       onClick={() => setPropertiesDropdownOpen(false)}
+                      className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                        isActive(link.path)
+                          ? 'bg-red-50 text-red-600 border-l-4 border-red-600'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
+                      }`}
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Insurance Dropdown */}
+            <div className="relative insurance-dropdown">
+              <button
+                onClick={() => setInsuranceDropdownOpen(!insuranceDropdownOpen)}
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                  isInsuranceActive()
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
+                }`}
+              >
+                <span>🛡️</span>
+                <span>Insurance</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${insuranceDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {insuranceDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  {insuranceLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setInsuranceDropdownOpen(false)}
                       className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
                         isActive(link.path)
                           ? 'bg-red-50 text-red-600 border-l-4 border-red-600'
