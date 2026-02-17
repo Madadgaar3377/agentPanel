@@ -897,6 +897,55 @@ const AssignmentDetail = () => {
             </div>
           )}
 
+          {applicationType === "insurance" && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Application Type</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base lg:text-lg">Insurance Application</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Application ID</p>
+                  <p className="font-black text-gray-900 text-sm break-all">{assignmentData.applicationId || "N/A"}</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Category</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base capitalize">{assignmentData.category || "Insurance"}</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">Status</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base capitalize">{assignmentData.status || "N/A"}</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100 xs:col-span-2">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:mb-2">City</p>
+                  <p className="font-black text-gray-900 text-sm sm:text-base">{assignmentData.city || "N/A"}</p>
+                </div>
+              </div>
+              {applicationData && (applicationData.planName || applicationData.policyType || applicationData.applicantName) && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <h4 className="font-bold text-gray-800 mb-3">Insurance Details</h4>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                    {applicationData.planName && (
+                      <p className="text-sm"><span className="text-gray-600">Plan:</span> <span className="font-semibold text-gray-900">{applicationData.planName}</span></p>
+                    )}
+                    {applicationData.policyType && (
+                      <p className="text-sm"><span className="text-gray-600">Policy Type:</span> <span className="font-semibold text-gray-900">{applicationData.policyType}</span></p>
+                    )}
+                    {applicationData.applicantName && (
+                      <p className="text-sm"><span className="text-gray-600">Applicant:</span> <span className="font-semibold text-gray-900">{applicationData.applicantName}</span></p>
+                    )}
+                    {applicationData.status && (
+                      <p className="text-sm"><span className="text-gray-600">Status:</span> <span className="font-semibold text-gray-900">{applicationData.status}</span></p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {(!applicationData || (!applicationData.planName && !applicationData.policyType && !applicationData.applicantName)) && (
+                <p className="text-sm text-gray-500 italic">Assignment summary shown above. Full insurance application details can be viewed from the insurance portal when available.</p>
+              )}
+            </div>
+          )}
+
           {applicationType === "unknown" && (
             <div className="text-center py-8">
               <p className="text-gray-600">Application details not available</p>
@@ -906,7 +955,7 @@ const AssignmentDetail = () => {
           <div className="mt-6 text-sm text-gray-600">
             <p>
               <span className="font-medium">Created At:</span>{" "}
-              {formatDate(applicationData.createdAt || applicationData.applicationAt)}
+              {formatDate(applicationData?.createdAt || applicationData?.applicationAt || assignmentData?.createdAt || assignmentData?.assigenAt)}
             </p>
           </div>
         </div>

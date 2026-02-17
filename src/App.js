@@ -17,7 +17,10 @@ import InstallmentEdit from "./pages/InstallmentEdit";
 import PropertyList from "./pages/PropertyList";
 import PropertyAdd from "./pages/PropertyAdd";
 import PropertyView from "./pages/PropertyView";
+import PropertyApplications from "./pages/PropertyApplications";
 import InstallmentApplications from "./pages/InstallmentApplications";
+import InsuranceApplications from "./pages/InsuranceApplications";
+import InsurancePlanCreate from "./pages/InsurancePlanCreate";
 import Profile from "./pages/Profile";
 import ProfileView from "./pages/ProfileView";
 import CasesList from "./pages/CasesList";
@@ -117,6 +120,14 @@ function App() {
             }
           />
           <Route
+            path="/property/applications"
+            element={
+              <ProtectedRoute>
+                <PropertyApplications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <ProtectedRoute>
@@ -165,10 +176,18 @@ function App() {
             }
           />
           <Route
+            path="/insurance/applications"
+            element={
+              <ProtectedRoute>
+                <InsuranceApplications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/insurance/create"
             element={
               <ProtectedRoute>
-                <InsurancePlanList />
+                <InsurancePlanCreate />
               </ProtectedRoute>
             }
           />

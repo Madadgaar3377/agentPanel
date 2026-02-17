@@ -24,7 +24,6 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/dashboard', label: 'Assignments', icon: '📋' },
-    { path: '/commission/tracking', label: 'Commission Tracking', icon: '💰' },
     { path: '/profile/view', label: 'Profile', icon: '👤' },
   ];
 
@@ -37,11 +36,13 @@ const Navbar = () => {
   const propertyLinks = [
     { path: '/property/list', label: 'My Properties', icon: '🏠' },
     { path: '/property/add', label: 'Add Property', icon: '➕' },
+    { path: '/property/applications', label: 'Applications', icon: '📝' },
   ];
 
   const insuranceLinks = [
     { path: '/insurance/list', label: 'My Insurance Plans', icon: '🛡️' },
     { path: '/insurance/create', label: 'Create Plan', icon: '➕' },
+    { path: '/insurance/applications', label: 'Applications', icon: '📝' },
   ];
 
   const isInstallmentActive = () => {
@@ -78,13 +79,13 @@ const Navbar = () => {
         }
       }
     };
-    if (installmentsDropdownOpen || propertiesDropdownOpen) {
+    if (installmentsDropdownOpen || propertiesDropdownOpen || insuranceDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [installmentsDropdownOpen, propertiesDropdownOpen]);
+  }, [installmentsDropdownOpen, propertiesDropdownOpen, insuranceDropdownOpen]);
 
   return (
     <nav className="bg-white shadow-lg border-b-2 border-red-200/20 sticky top-0 z-50">
@@ -99,7 +100,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center flex-wrap gap-1 justify-end max-w-full">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -144,7 +145,7 @@ const Navbar = () => {
                       key={link.path}
                       to={link.path}
                       onClick={() => setInstallmentsDropdownOpen(false)}
-                      className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                         isActive(link.path)
                           ? 'bg-red-50 text-red-600 border-l-4 border-red-600'
                           : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
@@ -187,7 +188,7 @@ const Navbar = () => {
                       key={link.path}
                       to={link.path}
                       onClick={() => setPropertiesDropdownOpen(false)}
-                      className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                         isActive(link.path)
                           ? 'bg-red-50 text-red-600 border-l-4 border-red-600'
                           : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
@@ -230,7 +231,7 @@ const Navbar = () => {
                       key={link.path}
                       to={link.path}
                       onClick={() => setInsuranceDropdownOpen(false)}
-                      className={`block px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                         isActive(link.path)
                           ? 'bg-red-50 text-red-600 border-l-4 border-red-600'
                           : 'text-gray-700 hover:bg-gray-100 hover:text-red-600'
@@ -246,17 +247,17 @@ const Navbar = () => {
           </div>
 
           {/* User Info and Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {/* User Info - Desktop */}
-            <div className="hidden sm:block text-right">
-              <p className="text-sm font-semibold text-gray-800">{user?.name || 'Agent'}</p>
-              <p className="text-xs text-gray-500">{user?.email || ''}</p>
+            <div className="hidden lg:block text-right min-w-0 max-w-[140px]">
+              <p className="text-sm font-semibold text-gray-800 truncate">{user?.name || 'Agent'}</p>
+              <p className="text-xs text-gray-500 truncate">{user?.email || ''}</p>
             </div>
 
-            {/* Logout Button */}
+            {/* Logout Button - hidden on mobile (logout is in mobile menu) */}
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg active:scale-95"
+              className="hidden md:inline-flex bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg active:scale-95 whitespace-nowrap"
             >
               Logout
             </button>
@@ -264,8 +265,9 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100"
+              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
               <svg
                 className="w-6 h-6"
@@ -288,11 +290,11 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
+          <div className="md:hidden border-t border-gray-200 py-4 space-y-2 max-h-[calc(100vh-4rem)] overflow-y-auto">
             {/* User Info - Mobile */}
             <div className="px-4 py-2 border-b border-gray-200">
-              <p className="text-sm font-semibold text-gray-800">{user?.name || 'Agent'}</p>
-              <p className="text-xs text-gray-500">{user?.email || ''}</p>
+              <p className="text-sm font-semibold text-gray-800 truncate">{user?.name || 'Agent'}</p>
+              <p className="text-xs text-gray-500 truncate">{user?.email || ''}</p>
             </div>
 
             {/* Mobile Navigation Links */}
@@ -301,9 +303,9 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
                   isActive(link.path)
-                    ? 'bg-primary text-white'
+                    ? 'bg-red-600 text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -318,7 +320,7 @@ const Navbar = () => {
                 onClick={() => setInstallmentsDropdownOpen(!installmentsDropdownOpen)}
                 className={`w-full px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-between ${
                   isInstallmentActive()
-                    ? 'bg-primary text-white'
+                    ? 'bg-red-600 text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -346,7 +348,7 @@ const Navbar = () => {
                         setMobileMenuOpen(false);
                         setInstallmentsDropdownOpen(false);
                       }}
-                      className={`block px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
                         isActive(link.path)
                           ? 'bg-red-50 text-red-600'
                           : 'text-gray-700 hover:bg-gray-100'
@@ -366,7 +368,7 @@ const Navbar = () => {
                 onClick={() => setPropertiesDropdownOpen(!propertiesDropdownOpen)}
                 className={`w-full px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-between ${
                   isPropertyActive()
-                    ? 'bg-primary text-white'
+                    ? 'bg-red-600 text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -394,7 +396,7 @@ const Navbar = () => {
                         setMobileMenuOpen(false);
                         setPropertiesDropdownOpen(false);
                       }}
-                      className={`block px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
                         isActive(link.path)
                           ? 'bg-red-50 text-red-600'
                           : 'text-gray-700 hover:bg-gray-100'
@@ -406,6 +408,66 @@ const Navbar = () => {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Mobile Insurance Section */}
+            <div className="px-4 py-2">
+              <button
+                onClick={() => setInsuranceDropdownOpen(!insuranceDropdownOpen)}
+                className={`w-full px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-between ${
+                  isInsuranceActive()
+                    ? 'bg-red-600 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span>🛡️</span>
+                  <span>Insurance</span>
+                </div>
+                <svg
+                  className={`w-4 h-4 transition-transform ${insuranceDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {insuranceDropdownOpen && (
+                <div className="mt-2 space-y-1 pl-6">
+                  {insuranceLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setInsuranceDropdownOpen(false);
+                      }}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                        isActive(link.path)
+                          ? 'bg-red-50 text-red-600'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span>{link.icon}</span>
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Logout */}
+            <div className="px-4 pt-2 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full px-4 py-3 rounded-lg font-semibold text-sm bg-red-600 hover:bg-red-700 text-white text-center transition-all duration-200"
+              >
+                Logout
+              </button>
             </div>
           </div>
         )}
