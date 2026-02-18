@@ -28,6 +28,7 @@ import CaseDetail from "./pages/CaseDetail";
 import CommissionTracking from "./pages/CommissionTracking";
 import InsurancePlanList from "./pages/InsurancePlanList";
 import LinkedPartners from "./pages/LinkedPartners";
+import Wallet from "./pages/Wallet";
 import "./App.css";
 
 function App() {
@@ -173,6 +174,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <LinkedPartners />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet"
+            element={
+              <ProtectedRoute>
+                <Wallet />
               </ProtectedRoute>
             }
           />

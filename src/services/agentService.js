@@ -106,3 +106,14 @@ export const updateAssignmentStatus = async (applicationId, status) => {
     status,
   });
 };
+
+// Withdrawal: create request (amount, note?, bankAccountIndex or bankAccount: { accountName, accountNumber, bankName })
+export const createWithdrawalRequest = async (payload) => {
+  return apiCall("/agent/withdrawal/request", "POST", payload);
+};
+
+// Withdrawal: get my requests (?status=pending|approved|rejected)
+export const getMyWithdrawalRequests = async (status = "") => {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiCall(`/agent/withdrawal/requests${query}`, "GET");
+};
