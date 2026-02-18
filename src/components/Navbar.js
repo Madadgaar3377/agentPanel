@@ -24,6 +24,7 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/dashboard', label: 'Assignments', icon: '📋' },
+    { path: '/linked-partners', label: 'Linked Partners', icon: '🤝' },
     { path: '/profile/view', label: 'Profile', icon: '👤' },
   ];
 

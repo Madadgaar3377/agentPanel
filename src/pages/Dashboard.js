@@ -200,8 +200,10 @@ const Dashboard = () => {
   };
   const agentInfo = dashboardData?.agentInfo || {
     name: user?.name || "Agent",
-    walletBalance: user?.walletBalance || 0,
+    walletBalance: user?.walletBalance ?? 0,
   };
+  const walletBalance = Number(agentInfo.walletBalance ?? user?.walletBalance ?? 0);
+  const walletDisplay = Number.isFinite(walletBalance) ? walletBalance.toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : "0";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
@@ -224,7 +226,7 @@ const Dashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="text-red-100 text-xs sm:text-sm font-medium mb-1">Wallet Balance</p>
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate">
-                  PKR {agentInfo.walletBalance?.toLocaleString() || user?.walletBalance?.toLocaleString() || '0'}
+                  PKR {walletDisplay}
                 </h3>
                 <p className="text-red-100 text-xs mt-2">Available for withdrawal</p>
               </div>

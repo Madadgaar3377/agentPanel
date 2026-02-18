@@ -121,6 +121,9 @@ const ProfileView = () => {
     );
   }
 
+  const walletNum = Number(walletBalance ?? userData?.walletBalance ?? 0);
+  const walletDisplay = Number.isFinite(walletNum) ? walletNum.toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : "0";
+
   if (!userData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
@@ -236,7 +239,7 @@ const ProfileView = () => {
                   <p className="text-sm font-medium">Wallet Balance</p>
                 </div>
                 <h4 className="text-2xl font-bold">
-                  PKR {walletBalance.toLocaleString() || userData.walletBalance?.toLocaleString() || '0'}
+                  PKR {walletDisplay}
                 </h4>
                 <p className="text-xs text-red-100 mt-1">Available for withdrawal</p>
               </div>

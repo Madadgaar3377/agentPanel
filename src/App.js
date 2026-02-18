@@ -27,6 +27,7 @@ import CasesList from "./pages/CasesList";
 import CaseDetail from "./pages/CaseDetail";
 import CommissionTracking from "./pages/CommissionTracking";
 import InsurancePlanList from "./pages/InsurancePlanList";
+import LinkedPartners from "./pages/LinkedPartners";
 import "./App.css";
 
 function App() {
@@ -164,6 +165,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CommissionTracking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/linked-partners"
+            element={
+              <ProtectedRoute>
+                <LinkedPartners />
               </ProtectedRoute>
             }
           />
