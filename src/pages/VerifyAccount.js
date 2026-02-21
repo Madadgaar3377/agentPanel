@@ -1,22 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { verifyAccount } from "../services/authService";
+import { verifyAccount, reSendVerificationOtp } from "../services/authService";
 
 const VerifyAccount = () => {
   const [otp, setOtp] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+  const autoResendDone = React.useRef(false);
 
   useEffect(() => {
-    // Get email from location state or prompt user
     const emailFromState = location.state?.email;
     if (emailFromState) {
       setEmail(emailFromState);
     }
   }, [location]);
+
+  // Auto resend OTP once when page loads with email (e.g. redirect from login)
+  useEffect(() => {
+    const emailToUse = location.state?.email?.trim();
+    if (!emailToUse || autoResendDone.current) return;
+    autoResendDone.current = true;
+    reSendVerificationOtp(emailToUse)
+      .then((res) => {
+        if (res?.success) {
+          toast.info(res.message || "Verification code sent to your email.");
+          setResendCooldown(60);
+        }
+      })
+      .catch(() => { /* silent; user can click Resend OTP */ });
+  }, [location.state?.email]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
 
   const handleChange = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 6);
@@ -45,10 +68,10 @@ const VerifyAccount = () => {
       });
 
       if (response.success) {
-        toast.success("Account verified successfully! Redirecting to login...");
+        toast.success("Account verified successfully! You can now sign in.");
         setTimeout(() => {
-          navigate("/login");
-        }, 2000);
+          navigate("/login", { replace: true });
+        }, 1500);
       } else {
         toast.error(response.message || "Verification failed");
       }
@@ -56,6 +79,29 @@ const VerifyAccount = () => {
       toast.error(err.message || "An error occurred during verification");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    const emailToUse = email?.trim();
+    if (!emailToUse) {
+      toast.error("Email is required to resend OTP");
+      return;
+    }
+    if (resendLoading || resendCooldown > 0) return;
+    setResendLoading(true);
+    try {
+      const response = await reSendVerificationOtp(emailToUse);
+      if (response?.success) {
+        toast.success(response.message || "OTP sent to your email.");
+        setResendCooldown(60);
+      } else {
+        toast.error(response?.message || "Failed to resend OTP");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to resend OTP");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -115,13 +161,23 @@ const VerifyAccount = () => {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Didn't receive the code?{" "}
-            <Link to="/login" className="text-primary hover:text-primary-dark font-semibold">
-              Back to Login
-            </Link>
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              disabled={resendLoading || resendCooldown > 0 || !email?.trim()}
+              className="text-primary hover:text-primary-dark font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {resendLoading ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
+            </button>
           </p>
+        </div>
+        <div className="mt-4 text-center">
+          <Link to="/login" className="text-sm text-gray-600 hover:text-primary font-semibold">
+            Back to Login
+          </Link>
         </div>
       </div>
     </div>

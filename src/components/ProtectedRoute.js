@@ -20,6 +20,11 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // If email not verified, redirect to OTP verify page (e.g. after login from another device)
+  if (user && user.emailVerify === false) {
+    return <Navigate to="/verify-account" state={{ email: user.email }} replace />;
+  }
+
   // Check if user is an agent
   if (user?.UserType !== "agent") {
     return (

@@ -26,7 +26,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await loginService(formData);
+      const response = await loginService({ ...formData, loginSource: 'agent' });
       if (response.success) {
         // Get user data from response
         const userData = response.user || response.data;
@@ -48,9 +48,23 @@ const Login = () => {
         toast.success("Login successful! Welcome back.");
         navigate("/dashboard");
       } else {
+        // Email not verified: redirect to OTP verify page
+        if (response.code === "EMAIL_NOT_VERIFIED" && response.email) {
+          toast.info("Please verify your email first. Enter the OTP sent to your email.");
+          navigate("/verify-account", { state: { email: response.email } });
+          setLoading(false);
+          return;
+        }
         toast.error(response.message || "Login failed");
       }
     } catch (err) {
+      const data = err.data || {};
+      if (data.code === "EMAIL_NOT_VERIFIED" && (data.email || formData.email)) {
+        toast.info("Please verify your email first. Enter the OTP sent to your email.");
+        navigate("/verify-account", { state: { email: data.email || formData.email } });
+        setLoading(false);
+        return;
+      }
       toast.error(err.message || "An error occurred during login");
     } finally {
       setLoading(false);

@@ -45,9 +45,36 @@ export const verifyAccount = async (otpData) => {
   return apiCall("/verifyAccount", "POST", otpData);
 };
 
-// Login
+const fetchClientIp = async () => {
+  try {
+    const r = await fetch("https://api.ipify.org?format=json", { signal: AbortSignal.timeout(3000) });
+    const d = await r.json();
+    return d?.ip || null;
+  } catch {
+    return null;
+  }
+};
+
+// Login (returns full response so caller can check code e.g. EMAIL_NOT_VERIFIED)
 export const login = async (credentials) => {
-  return apiCall("/login", "POST", credentials);
+  const url = `${API_BASE_URL}/login`;
+  const token = getAuthToken();
+  const clientIp = await fetchClientIp();
+  const payload = { ...credentials, ...(clientIp && { clientIp }) };
+  const options = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  };
+  if (token) options.headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(url, options);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const err = new Error(data.message || "Request failed");
+    err.data = data;
+    throw err;
+  }
+  return data;
 };
 
 // Forget Password
@@ -63,6 +90,12 @@ export const newPassword = async (passwordData) => {
 // Resend OTP for Password
 export const reSendOtpForPassword = async (email) => {
   return apiCall("/reSendOtpForPassword", "POST", { email });
+};
+
+// Resend verification OTP (email verify). Pass email string.
+export const reSendVerificationOtp = async (emailOrPayload) => {
+  const email = typeof emailOrPayload === "string" ? emailOrPayload : emailOrPayload?.email;
+  return apiCall("/reSendOtp", "POST", { email });
 };
 
 // Get User By ID (requires auth)
