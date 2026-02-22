@@ -54,6 +54,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingIdCard, setUploadingIdCard] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -64,6 +65,7 @@ const Profile = () => {
     Address: "",
     profilePic: "",
     cnicNumber: "",
+    idCardPic: "",
     BankAccountinfo: [],
   });
 
@@ -88,6 +90,7 @@ const Profile = () => {
           Address: userData.Address || "",
           profilePic: userData.profilePic || "",
           cnicNumber: userData.cnicNumber || "",
+          idCardPic: userData.idCardPic || "",
           BankAccountinfo: userData.BankAccountinfo || [],
         });
       }
@@ -97,7 +100,7 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchProfileData();
@@ -183,6 +186,41 @@ const Profile = () => {
     toast.success("Bank account removed");
   };
 
+  const handleIdCardUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith("image/")) {
+      toast.error("Please select a valid image");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+    setUploadingIdCard(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const token = getAuthToken();
+      const res = await fetch(`${API_BASE_URL}/upload-image`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      const data = await res.json();
+      if (res.ok && (data.imageUrl || data.url || data.data?.url || data.data)) {
+        const url = data.imageUrl || data.url || data.data?.url || data.data;
+        setFormData((prev) => ({ ...prev, idCardPic: url }));
+        toast.success("ID card image uploaded");
+      } else {
+        toast.error(data.message || "Upload failed");
+      }
+    } catch (err) {
+      toast.error("Failed to upload");
+    } finally {
+      setUploadingIdCard(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -196,6 +234,7 @@ const Profile = () => {
         Address: formData.Address,
         profilePic: formData.profilePic,
         cnicNumber: formData.cnicNumber,
+        idCardPic: formData.idCardPic,
         BankAccountinfo: formData.BankAccountinfo,
       };
 
@@ -388,6 +427,31 @@ const Profile = () => {
                     className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all resize-none"
                   />
                 </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">ID card picture</label>
+                <div className="flex items-center gap-4">
+                  {formData.idCardPic ? (
+                    <div className="relative">
+                      <img src={formData.idCardPic} alt="ID card" className="h-20 w-auto rounded-lg border-2 border-gray-200 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, idCardPic: "" }))}
+                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full text-sm flex items-center justify-center hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : null}
+                  <label className="cursor-pointer">
+                    <input type="file" accept="image/*" onChange={handleIdCardUpload} className="hidden" disabled={uploadingIdCard} />
+                    <div className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium inline-flex items-center gap-2">
+                      {uploadingIdCard ? "Uploading..." : formData.idCardPic ? "Change ID card" : "Upload ID card"}
+                    </div>
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Required for agent verification. JPG/PNG, max 5MB</p>
               </div>
             </div>
           </div>

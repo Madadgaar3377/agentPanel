@@ -30,6 +30,7 @@ import CommissionTracking from "./pages/CommissionTracking";
 import InsurancePlanList from "./pages/InsurancePlanList";
 import LinkedPartners from "./pages/LinkedPartners";
 import Wallet from "./pages/Wallet";
+import CompleteProfile from "./pages/CompleteProfile";
 import "./App.css";
 
 function LoginPage() {
@@ -134,6 +135,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PropertyApplications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/complete-profile"
+            element={
+              <ProtectedRoute>
+                <CompleteProfile />
               </ProtectedRoute>
             }
           />

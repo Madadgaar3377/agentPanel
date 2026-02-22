@@ -1,9 +1,13 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { isAgentProfileComplete } from "../utils/agentProfile";
+import UnderReview from "../pages/UnderReview";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading, user, logout } = useAuth();
+  const location = useLocation();
+  const pathname = location.pathname || "";
 
   if (loading) {
     return (
@@ -20,12 +24,10 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // If email not verified, redirect to OTP verify page (e.g. after login from another device)
   if (user && user.emailVerify === false) {
     return <Navigate to="/verify-account" state={{ email: user.email }} replace />;
   }
 
-  // Check if user is an agent
   if (user?.UserType !== "agent") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center px-4">
@@ -47,6 +49,17 @@ const ProtectedRoute = ({ children }) => {
         </div>
       </div>
     );
+  }
+
+  if (user && user.isVerified === false) {
+    return <UnderReview />;
+  }
+
+  if (user && !isAgentProfileComplete(user)) {
+    if (pathname === "/complete-profile" || pathname === "/profile") {
+      return children;
+    }
+    return <Navigate to="/complete-profile" replace />;
   }
 
   return children;
