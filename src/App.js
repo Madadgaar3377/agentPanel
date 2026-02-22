@@ -1,10 +1,11 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
+import LoginWithToken from "./pages/LoginWithToken";
 import Signup from "./pages/Signup";
 import VerifyAccount from "./pages/VerifyAccount";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -31,12 +32,19 @@ import LinkedPartners from "./pages/LinkedPartners";
 import Wallet from "./pages/Wallet";
 import "./App.css";
 
+function LoginPage() {
+  const location = useLocation();
+  const token = new URLSearchParams(location.search).get("token");
+  if (token && token.trim()) return <LoginWithToken />;
+  return <Login />;
+}
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/verify-account" element={<VerifyAccount />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
