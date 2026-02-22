@@ -52,6 +52,9 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (user && user.isVerified === false) {
+    if (pathname === "/complete-profile" || pathname === "/profile") {
+      return children;
+    }
     return <UnderReview />;
   }
 

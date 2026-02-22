@@ -23,7 +23,7 @@ export default function UnderReview() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/complete-profile")}
             className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90 transition"
           >
             Complete profile
