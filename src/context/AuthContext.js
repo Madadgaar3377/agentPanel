@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
-import { getAuthToken, setAuthToken, removeAuthToken } from "../config/api";
+import { getAuthToken, setAuthToken, removeAuthToken, isSessionExpired } from "../config/api";
 import { getUserById } from "../services/authService";
 
 const AuthContext = createContext(null);
@@ -52,13 +52,19 @@ export const AuthProvider = ({ children }) => {
   }, [logout]);
 
   useEffect(() => {
-    // Check if user is already logged in
     const token = getAuthToken();
-    if (token) {
-      fetchUser();
-    } else {
+    if (!token) {
       setLoading(false);
+      return;
     }
+    if (isSessionExpired()) {
+      removeAuthToken();
+      setUser(null);
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
+    fetchUser();
   }, [fetchUser]);
 
   const login = useCallback((token, userData = null) => {
