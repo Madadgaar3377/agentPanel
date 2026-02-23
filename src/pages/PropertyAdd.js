@@ -567,11 +567,11 @@ const PropertyAdd = () => {
                 const property = response.property || response.data;
                 setIsEditMode(true);
                 
-                // Get propertyId from the property
-                const propId = property.type === 'Project' 
-                    ? property.project?.propertyId 
+                // 8-digit propertyId is in project/individualProperty (required for update; do not use Mongo _id)
+                const propId = property.type === 'Project'
+                    ? property.project?.propertyId
                     : property.individualProperty?.propertyId;
-                setPropertyId(propId || id);
+                setPropertyId(propId || '');
                 
                 // Determine property type and load data
                 if (property.type === 'Project' && property.project) {

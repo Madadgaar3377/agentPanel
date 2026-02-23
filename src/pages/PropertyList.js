@@ -78,7 +78,8 @@ const PropertyList = () => {
                 units: property.project.totalUnits || 'N/A',
                 images: property.project.images || [],
                 contact: property.project.contact?.name || 'N/A',
-                propertyId: property.project.propertyId || property._id,
+                propertyId: property.project.propertyId,
+                _id: property._id,
                 description: property.project.description || '',
                 projectType: property.project.projectType || 'N/A',
             };
@@ -94,7 +95,8 @@ const PropertyList = () => {
                 bathrooms: property.individualProperty.bathrooms || 0,
                 images: property.individualProperty.images || [],
                 contact: property.individualProperty.contact?.name || 'N/A',
-                propertyId: property.individualProperty.propertyId || property._id,
+                propertyId: property.individualProperty.propertyId,
+                _id: property._id,
                 description: property.individualProperty.description || '',
                 propertyType: property.individualProperty.propertyType || 'N/A',
             };
@@ -107,6 +109,8 @@ const PropertyList = () => {
             price: 0,
             size: 'N/A',
             images: [],
+            propertyId: property?.project?.propertyId || property?.individualProperty?.propertyId,
+            _id: property?._id,
         };
     };
 
@@ -359,20 +363,21 @@ const PropertyList = () => {
 
                                             <div className="pt-3 flex gap-3">
                                                 <button
-                                                    onClick={() => navigate(`/property/view/${data.propertyId}`)}
+                                                    onClick={() => navigate(`/property/view/${data._id}`)}
                                                     className="flex-1 py-3 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 text-blue-700 rounded-xl text-sm font-bold hover:from-blue-100 hover:to-blue-200 transition-all duration-300 active:scale-95"
                                                 >
                                                     View
                                                 </button>
                                                 <button
-                                                    onClick={() => navigate(`/property/edit/${data.propertyId}`)}
+                                                    onClick={() => navigate(`/property/edit/${data._id}`)}
                                                     className="flex-1 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl text-sm font-bold hover:from-red-700 hover:to-rose-700 transition-all duration-300 active:scale-95"
                                                 >
                                                     Edit
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(data.propertyId)}
-                                                    className="px-4 py-3 bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 hover:text-red-600 rounded-xl transition-all duration-300 border-2 border-gray-200 hover:border-red-600 active:scale-95"
+                                                    onClick={() => data.propertyId && handleDelete(data.propertyId)}
+                                                    disabled={!data.propertyId}
+                                                    className="px-4 py-3 bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 hover:text-red-600 rounded-xl transition-all duration-300 border-2 border-gray-200 hover:border-red-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
