@@ -107,12 +107,19 @@ export const updateAssignmentStatus = async (applicationId, status) => {
   });
 };
 
+// Withdrawal: preview deductions for an amount (GET ?amount=)
+export const getWithdrawalPreview = async (amount) => {
+  const num = Number(amount);
+  if (!num || num < 1) return { success: false, data: null };
+  return apiCall(`/agent/withdrawal/preview?amount=${encodeURIComponent(num)}`, "GET");
+};
+
 // Withdrawal: create request (amount, note?, bankAccountIndex or bankAccount: { accountName, accountNumber, bankName })
 export const createWithdrawalRequest = async (payload) => {
   return apiCall("/agent/withdrawal/request", "POST", payload);
 };
 
-// Withdrawal: get my requests (?status=pending|approved|rejected)
+// Withdrawal: get my requests (?status=pending|approved|rejected) - includes deductionBreakdown per request
 export const getMyWithdrawalRequests = async (status = "") => {
   const query = status ? `?status=${encodeURIComponent(status)}` : "";
   return apiCall(`/agent/withdrawal/requests${query}`, "GET");

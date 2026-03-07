@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { getAgentDashboard, getAgentAssignments } from "../services/agentService";
 import StatCard from "../components/StatCard";
 import AssignmentCard from "../components/AssignmentCard";
@@ -9,8 +9,7 @@ import AssignmentFilters from "../components/AssignmentFilters";
 import Navbar from "../components/Navbar";
 
 const Dashboard = () => {
-  const { user, logout, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [dashboardData, setDashboardData] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -208,34 +207,41 @@ const Dashboard = () => {
   const walletDisplay = String(walletBalance.toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50/30">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="page-container">
         {/* Welcome Section */}
-        <div className="mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
-            Welcome back, {agentInfo.name || user?.name || "Agent"}!
-          </h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Here's your dashboard overview</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="section-title">
+            Welcome back, {agentInfo.name || user?.name || "Agent"}
+          </h1>
+          <p className="section-subtitle">Here’s your dashboard overview</p>
         </div>
-
 
         {/* Wallet Balance Card */}
         <div className="mb-6 sm:mb-8">
-          <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-xl shadow-xl p-4 sm:p-6 text-white">
+          <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-xl shadow-lg border border-red-500/10 p-5 sm:p-6 text-white">
             <div className="flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <p className="text-red-100 text-xs sm:text-sm font-medium mb-1">Wallet Balance</p>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate" title={`PKR ${walletDisplay}`}>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate" title={`PKR ${walletDisplay}`}>
                   PKR {walletDisplay}
-                </h3>
-                <p className="text-red-100 text-xs mt-2">Available for withdrawal</p>
+                </h2>
+                <p className="text-red-100/90 text-xs mt-2">Available for withdrawal</p>
               </div>
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <Link
+                  to="/wallet"
+                  className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition"
+                >
+                  Wallet
+                </Link>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -297,12 +303,13 @@ const Dashboard = () => {
         </div>
 
         {/* Assignments Section */}
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6">
+        <div className="card">
+          <div className="card-body">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-800">My Assignments</h3>
+            <h2 className="section-title">My Assignments</h2>
             <button
               onClick={fetchAssignments}
-              className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition text-sm sm:text-base font-semibold whitespace-nowrap self-start sm:self-auto"
+              className="btn-primary whitespace-nowrap self-start sm:self-auto"
             >
               Refresh
             </button>
@@ -382,6 +389,7 @@ const Dashboard = () => {
               )}
             </>
           )}
+          </div>
         </div>
       </div>
     </div>

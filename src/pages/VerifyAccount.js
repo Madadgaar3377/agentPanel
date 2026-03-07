@@ -21,19 +21,19 @@ const VerifyAccount = () => {
   }, [location]);
 
   // Auto resend OTP once when page loads with email (e.g. redirect from login)
-  useEffect(() => {
-    const emailToUse = location.state?.email?.trim();
-    if (!emailToUse || autoResendDone.current) return;
-    autoResendDone.current = true;
-    reSendVerificationOtp(emailToUse)
-      .then((res) => {
-        if (res?.success) {
-          toast.info(res.message || "Verification code sent to your email.");
-          setResendCooldown(60);
-        }
-      })
-      .catch(() => { /* silent; user can click Resend OTP */ });
-  }, [location.state?.email]);
+  // useEffect(() => {
+  //   const emailToUse = location.state?.email?.trim();
+  //   if (!emailToUse || autoResendDone.current) return;
+  //   autoResendDone.current = true;
+  //   reSendVerificationOtp(emailToUse)
+  //     .then((res) => {
+  //       if (res?.success) {
+  //         toast.info(res.message || "Verification code sent to your email.");
+  //         setResendCooldown(60);
+  //       }
+  //     })
+  //     .catch(() => { /* silent; user can click Resend OTP */ });
+  // }, [location.state?.email]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
