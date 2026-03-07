@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AgentLayout from "./components/AgentLayout";
 import Login from "./pages/Login";
 import LoginWithToken from "./pages/LoginWithToken";
 import Signup from "./pages/Signup";
@@ -50,190 +51,29 @@ function App() {
           <Route path="/verify-account" element={<VerifyAccount />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/new-password" element={<NewPassword />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/assignment/:assignmentId"
-            element={
-              <ProtectedRoute>
-                <AssignmentDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/installments/create"
-            element={
-              <ProtectedRoute>
-                <CreateInstallment />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/installments/list"
-            element={
-              <ProtectedRoute>
-                <InstallmentsList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/installments/edit/:id"
-            element={
-              <ProtectedRoute>
-                <InstallmentEdit />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/installments/applications"
-            element={
-              <ProtectedRoute>
-                <InstallmentApplications />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/property/list"
-            element={
-              <ProtectedRoute>
-                <PropertyList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/property/add"
-            element={
-              <ProtectedRoute>
-                <PropertyAdd />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/property/edit/:id"
-            element={
-              <ProtectedRoute>
-                <PropertyAdd />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/property/view/:id"
-            element={
-              <ProtectedRoute>
-                <PropertyView />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/property/applications"
-            element={
-              <ProtectedRoute>
-                <PropertyApplications />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/complete-profile"
-            element={
-              <ProtectedRoute>
-                <CompleteProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile/view"
-            element={
-              <ProtectedRoute>
-                <ProfileView />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cases"
-            element={
-              <ProtectedRoute>
-                <CasesList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cases/detail/:caseId"
-            element={
-              <ProtectedRoute>
-                <CaseDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/commission/tracking"
-            element={
-              <ProtectedRoute>
-                <CommissionTracking />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/linked-partners"
-            element={
-              <ProtectedRoute>
-                <LinkedPartners />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/wallet"
-            element={
-              <ProtectedRoute>
-                <Wallet />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/insurance/list"
-            element={
-              <ProtectedRoute>
-                <InsurancePlanList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/insurance/applications"
-            element={
-              <ProtectedRoute>
-                <InsuranceApplications />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/insurance/create"
-            element={
-              <ProtectedRoute>
-                <InsurancePlanCreate />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/insurance/edit/:id"
-            element={
-              <ProtectedRoute>
-                <InsurancePlanList />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/dashboard" element={<AgentLayout><Dashboard /></AgentLayout>} />
+          <Route path="/dashboard/assignment/:assignmentId" element={<AgentLayout><AssignmentDetail /></AgentLayout>} />
+          <Route path="/installments/create" element={<AgentLayout><CreateInstallment /></AgentLayout>} />
+          <Route path="/installments/list" element={<AgentLayout><InstallmentsList /></AgentLayout>} />
+          <Route path="/installments/edit/:id" element={<AgentLayout><InstallmentEdit /></AgentLayout>} />
+          <Route path="/installments/applications" element={<AgentLayout><InstallmentApplications /></AgentLayout>} />
+          <Route path="/property/list" element={<AgentLayout><PropertyList /></AgentLayout>} />
+          <Route path="/property/add" element={<AgentLayout><PropertyAdd /></AgentLayout>} />
+          <Route path="/property/edit/:id" element={<AgentLayout><PropertyAdd /></AgentLayout>} />
+          <Route path="/property/view/:id" element={<AgentLayout><PropertyView /></AgentLayout>} />
+          <Route path="/property/applications" element={<AgentLayout><PropertyApplications /></AgentLayout>} />
+          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+          <Route path="/profile" element={<AgentLayout><Profile /></AgentLayout>} />
+          <Route path="/profile/view" element={<AgentLayout><ProfileView /></AgentLayout>} />
+          <Route path="/cases" element={<AgentLayout><CasesList /></AgentLayout>} />
+          <Route path="/cases/detail/:caseId" element={<AgentLayout><CaseDetail /></AgentLayout>} />
+          <Route path="/commission/tracking" element={<AgentLayout><CommissionTracking /></AgentLayout>} />
+          <Route path="/linked-partners" element={<AgentLayout><LinkedPartners /></AgentLayout>} />
+          <Route path="/wallet" element={<AgentLayout><Wallet /></AgentLayout>} />
+          <Route path="/insurance/list" element={<AgentLayout><InsurancePlanList /></AgentLayout>} />
+          <Route path="/insurance/applications" element={<AgentLayout><InsuranceApplications /></AgentLayout>} />
+          <Route path="/insurance/create" element={<AgentLayout><InsurancePlanCreate /></AgentLayout>} />
+          <Route path="/insurance/edit/:id" element={<AgentLayout><InsurancePlanList /></AgentLayout>} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           {/* Catch-all route - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAgentAssignmentById, updateAssignmentStatus } from "../services/agentService";
-import Navbar from "../components/Navbar";
 
 const AssignmentDetail = () => {
   const { assignmentId } = useParams();
@@ -130,10 +129,7 @@ const AssignmentDetail = () => {
   // const planInfo = applicationData.PlanInfo?.[0] || applicationData.planInfo || {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-      <Navbar />
-
-      <div className="max-w-6xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div className="page-container max-w-6xl">
         {/* Back Button */}
               <button
                 onClick={() => navigate("/dashboard")}
@@ -1045,7 +1041,6 @@ const AssignmentDetail = () => {
           </div>
         )}
       </div>
-    </div>
   );
 };
 

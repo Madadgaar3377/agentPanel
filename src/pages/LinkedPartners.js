@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, getAuthToken } from "../config/api";
-import Navbar from "../components/Navbar";
 
 const LinkedPartners = () => {
   const navigate = useNavigate();
@@ -40,9 +39,7 @@ const LinkedPartners = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="page-container max-w-4xl">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <span>🤝</span> Linked Partners & Companies
@@ -90,7 +87,6 @@ const LinkedPartners = () => {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 };

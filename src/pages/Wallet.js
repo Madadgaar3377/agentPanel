@@ -6,7 +6,6 @@ import { getUserById } from "../services/authService";
 import { getAgentDashboard } from "../services/agentService";
 import { getWithdrawalPreview, createWithdrawalRequest, getMyWithdrawalRequests } from "../services/agentService";
 import { openWithdrawalInvoice, openWithdrawalInvoicesAll } from "../utils/withdrawalInvoice";
-import Navbar from "../components/Navbar";
 
 const Wallet = () => {
   const { user, fetchUser } = useAuth();
@@ -129,9 +128,7 @@ const Wallet = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50/30">
-      <Navbar />
-      <div className="page-container max-w-4xl">
+    <div className="page-container max-w-4xl">
         <div className="mb-6 sm:mb-8">
           <h1 className="section-title">Wallet & Withdraw</h1>
           <p className="section-subtitle">Request withdrawal to your bank account. Approved payments can be downloaded as an invoice.</p>
@@ -333,7 +330,6 @@ const Wallet = () => {
           </div>
         )}
       </div>
-    </div>
   );
 };
 

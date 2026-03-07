@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 
 const API_BASE_URL = "https://api.madadgaar.com.pk/api";
 
@@ -110,9 +109,7 @@ const CommissionTracking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-      <Navbar />
-      <div className="container mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+    <div className="page-container">
         <div className="mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
             Commission Tracking
@@ -346,7 +343,6 @@ const CommissionTracking = () => {
             </tbody>
           </table>
         </div>
-      </div>
       </div>
     </div>
   );

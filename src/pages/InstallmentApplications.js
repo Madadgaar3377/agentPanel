@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { getAllApplications, updateApplicationStatus } from '../services/installmentService';
-import Navbar from '../components/Navbar';
 
 const InstallmentApplications = () => {
     const { user } = useAuth();
@@ -122,22 +121,17 @@ const InstallmentApplications = () => {
     const validStatuses = ['pending', 'in_progress', 'approved', 'rejected', 'completed', 'cancelled'];
 
     if (loading && applications.length === 0) return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-            <Navbar />
-            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-                <div className="relative">
-                    <div className="w-16 h-16 border-4 border-red-100 rounded-full"></div>
-                    <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin absolute top-0"></div>
-                </div>
-                <p className="text-sm font-medium text-gray-600">Loading applications...</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-red-100 rounded-full"></div>
+                <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin absolute top-0"></div>
             </div>
+            <p className="text-sm font-medium text-gray-600">Loading applications...</p>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-            <Navbar />
-            <div className="px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div className="page-container space-y-6">
                 {/* Header */}
                 <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-rose-600 rounded-3xl shadow-2xl p-8">
                     <div className="absolute top-0 right-0 -mt-4 -mr-4 w-40 h-40 bg-white opacity-5 rounded-full blur-3xl"></div>
@@ -299,8 +293,6 @@ const InstallmentApplications = () => {
                         </p>
                     </div>
                 )}
-            </div>
-
             {/* View Details Modal */}
             {showViewModal && viewingApplication && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">

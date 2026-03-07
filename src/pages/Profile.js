@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { getUserById, updateUser } from "../services/authService";
 import { API_BASE_URL, getAuthToken } from "../config/api";
-import Navbar from "../components/Navbar";
 // Icons as SVG components
 const UserIcon = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -268,10 +267,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-      <Navbar />
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="page-container max-w-4xl">
         {/* Header */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-800">Complete Your Profile</h2>
@@ -566,7 +562,6 @@ const Profile = () => {
           </div>
         </form>
       </div>
-    </div>
   );
 };
 

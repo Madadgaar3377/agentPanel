@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getPropertyById } from '../services/propertyService';
-import Navbar from '../components/Navbar';
 
 const PropertyView = () => {
     const { id } = useParams();
@@ -32,16 +31,13 @@ const PropertyView = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-                <Navbar />
-                <div className="flex items-center justify-center min-h-[60vh]">
-                    <div className="text-center">
-                        <div className="relative">
-                            <div className="w-16 h-16 border-4 border-primary/20 rounded-full mx-auto"></div>
-                            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
-                        </div>
-                        <p className="mt-4 text-sm font-medium text-gray-600">Loading property details...</p>
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="text-center">
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-primary/20 rounded-full mx-auto"></div>
+                        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
                     </div>
+                    <p className="mt-4 text-sm font-medium text-gray-600">Loading property details...</p>
                 </div>
             </div>
         );
@@ -49,18 +45,15 @@ const PropertyView = () => {
 
     if (!property) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-                <Navbar />
-                <div className="flex items-center justify-center min-h-[60vh]">
-                    <div className="text-center">
-                        <p className="text-gray-600 text-lg mb-4">Property not found</p>
-                        <button
-                            onClick={() => navigate('/property/list')}
-                            className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-bold"
-                        >
-                            Back to Properties
-                        </button>
-                    </div>
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="text-center">
+                    <p className="text-gray-600 text-lg mb-4">Property not found</p>
+                    <button
+                        onClick={() => navigate('/property/list')}
+                        className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-bold"
+                    >
+                        Back to Properties
+                    </button>
                 </div>
             </div>
         );
@@ -72,9 +65,7 @@ const PropertyView = () => {
         : property.individualProperty?.propertyId;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-            <Navbar />
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="page-container max-w-6xl mx-auto">
                 {/* Back Button */}
                 <button
                     onClick={() => navigate('/property/list')}
@@ -220,7 +211,6 @@ const PropertyView = () => {
                     </button>
                 </div>
             </div>
-        </div>
     );
 };
 

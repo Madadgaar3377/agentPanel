@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import Navbar from '../components/Navbar';
 import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
 
@@ -146,31 +145,23 @@ const CaseDetail = () => {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
-        </div>
-      </>
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+      </div>
     );
   }
 
   if (!caseData) {
     return (
-      <>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <p className="text-gray-500">Assignment not found</p>
-        </div>
-      </>
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <p className="text-gray-500">Assignment not found</p>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+    <div className="page-container">
+      <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
             <button
@@ -381,7 +372,6 @@ const CaseDetail = () => {
           </div>
         </div>
       </div>
-    </>
   );
 };
 

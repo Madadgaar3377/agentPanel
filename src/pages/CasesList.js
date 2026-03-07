@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import Navbar from '../components/Navbar';
 import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
 
@@ -94,20 +93,15 @@ const CasesList = () => {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
-        </div>
-      </>
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+    <div className="page-container">
+      <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900">My Assignments</h1>
@@ -319,7 +313,6 @@ const CasesList = () => {
           )}
         </div>
       </div>
-    </>
   );
 };
 

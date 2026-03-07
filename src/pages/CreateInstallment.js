@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createInstallmentPlan, uploadImage } from '../services/installmentService';
 import { PRODUCT_CATEGORIES, CATEGORY_SPECIFICATIONS, getGroupedCategories } from '../constants/productCategories';
-import Navbar from '../components/Navbar';
 import RichTextEditor from '../components/RichTextEditor';
 
 // Toast Notification Component - Enhanced
@@ -321,9 +320,7 @@ const CreateInstallment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
-            <Navbar />
-            <div className="max-w-6xl mx-auto p-6 space-y-8">
+        <div className="page-container max-w-6xl mx-auto space-y-8">
                 {/* Header Card */}
                 <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex justify-between items-center">
                     <div>
@@ -712,7 +709,6 @@ const CreateInstallment = () => {
                         </div>
                     </div>
                 </div>
-            </div>
 
             {/* Toast Notification */}
             {toast && (

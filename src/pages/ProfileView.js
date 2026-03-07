@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { getUserById } from "../services/authService";
 import { getAgentDashboard } from "../services/agentService";
-import Navbar from "../components/Navbar";
 
 // Icons as SVG components
 const UserIcon = ({ className }) => (
@@ -126,9 +125,7 @@ const ProfileView = () => {
 
   if (!userData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-container max-w-4xl">
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <p className="text-gray-600 mb-6">Unable to load profile data</p>
             <button
@@ -139,15 +136,11 @@ const ProfileView = () => {
             </button>
           </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
-      <Navbar />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="page-container max-w-6xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -416,7 +409,6 @@ const ProfileView = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

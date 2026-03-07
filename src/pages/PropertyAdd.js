@@ -4,7 +4,6 @@ import { toast as reactToast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { createProperty, updateProperty, getPropertyById, uploadImage } from '../services/propertyService';
 import { API_BASE_URL, getAuthToken } from '../config/api';
-import Navbar from '../components/Navbar';
 import cities from '../constants/cities';
 import RichTextEditor from '../components/RichTextEditor';
 
@@ -957,15 +956,12 @@ const PropertyAdd = () => {
     // Show loading when fetching property
     if (fetchingProperty) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-                <Navbar />
-                <div className="max-w-7xl mx-auto px-3 xs:px-4 md:px-6 py-4 xs:py-6 md:py-8">
-                    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-                        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                        <div className="text-center">
-                            <p className="text-lg font-black text-gray-900 uppercase tracking-wider">Loading Property Data</p>
-                            <p className="text-sm text-gray-500 font-medium mt-2">Please wait...</p>
-                        </div>
+            <div className="page-container">
+                <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+                    <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                    <div className="text-center">
+                        <p className="text-lg font-black text-gray-900 uppercase tracking-wider">Loading Property Data</p>
+                        <p className="text-sm text-gray-500 font-medium mt-2">Please wait...</p>
                     </div>
                 </div>
             </div>
@@ -973,9 +969,7 @@ const PropertyAdd = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-            <Navbar />
-            <div className="max-w-7xl mx-auto px-3 xs:px-4 md:px-6 py-4 xs:py-6 md:py-8 space-y-4 xs:space-y-6 md:space-y-8 animate-in fade-in duration-700">
+        <div className="page-container max-w-7xl mx-auto space-y-4 xs:space-y-6 md:space-y-8 animate-in fade-in duration-700">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 xs:p-8 md:p-10 rounded-2xl xs:rounded-3xl shadow-2xl shadow-red-200/50 border border-red-500/20 relative overflow-hidden">
                     {/* Background Pattern */}
@@ -3733,7 +3727,6 @@ const PropertyAdd = () => {
                         </button>
                     </div>
                 </div>
-            </div>
 
             {/* Toast Notification */}
             {toast && (

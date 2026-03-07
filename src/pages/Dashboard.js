@@ -6,7 +6,6 @@ import { getAgentDashboard, getAgentAssignments } from "../services/agentService
 import StatCard from "../components/StatCard";
 import AssignmentCard from "../components/AssignmentCard";
 import AssignmentFilters from "../components/AssignmentFilters";
-import Navbar from "../components/Navbar";
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -207,10 +206,7 @@ const Dashboard = () => {
   const walletDisplay = String(walletBalance.toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 0 }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50/30">
-      <Navbar />
-
-      <div className="page-container">
+    <div className="page-container">
         {/* Welcome Section */}
         <div className="mb-6 sm:mb-8">
           <h1 className="section-title">
@@ -392,7 +388,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

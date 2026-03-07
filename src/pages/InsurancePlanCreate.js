@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import Navbar from '../components/Navbar';
 import { API_BASE_URL, getAuthToken } from '../config/api';
 
 const POLICY_TYPES = ['Life', 'Health', 'Motor', 'Travel', 'Property', 'Takaful'];
@@ -193,9 +192,7 @@ const InsurancePlanCreate = () => {
   const canPrev = step > 1;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="page-container max-w-3xl mx-auto">
         <div className="mb-6">
           <button
             type="button"
@@ -404,7 +401,6 @@ const InsurancePlanCreate = () => {
             )}
           </div>
         </form>
-      </div>
     </div>
   );
 };
