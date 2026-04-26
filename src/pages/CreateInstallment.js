@@ -77,6 +77,11 @@ const CreateInstallment = () => {
     const [toast, setToast] = useState(null);
     const [localImages, setLocalImages] = useState([]);
 
+    // Multi-vendor logic state
+    const [existingProducts, setExistingProducts] = useState([]);
+    const [selectedProductId, setSelectedProductId] = useState('');
+    const [existingPlans, setExistingPlans] = useState([]);
+
     const showToast = (message, type) => {
         setToast({ message, type });
     };
@@ -108,6 +113,69 @@ const CreateInstallment = () => {
             specifications: []
         },
     });
+
+    // Fetch all existing installment products on mount
+    useEffect(() => {
+        const fetchExistingProducts = async () => {
+            try {
+                // Determine base API dynamically based on where services point
+                // The backend API is at http://localhost:8080/api by default
+                const baseApi = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+                const res = await fetch(`${baseApi}/getAllInstallments`);
+                const data = await res.json();
+                if (data.success) {
+                    setExistingProducts(data.data);
+                }
+            } catch (err) {
+                console.error("Error fetching existing products:", err);
+            }
+        };
+        fetchExistingProducts();
+    }, []);
+
+    const handleSelectExistingProduct = (productId) => {
+        setSelectedProductId(productId);
+        
+        if (!productId) {
+            setExistingPlans([]);
+            setForm(prev => ({
+                ...prev,
+                productName: "",
+                city: "",
+                price: "",
+                downpayment: "",
+                installment: "",
+                tenure: "",
+                description: "",
+                companyName: "",
+                category: "",
+                productImages: [],
+                paymentPlans: [{ ...defaultPlan }],
+                productSpecifications: { category: "", subCategory: "", specifications: [] }
+            }));
+            return;
+        }
+
+        const product = existingProducts.find(p => p.installmentPlanId === productId || p._id === productId);
+        if (product) {
+            setExistingPlans(product.paymentPlans || []);
+            setForm(prev => ({
+                ...prev,
+                productName: product.productName || "",
+                city: product.city || "",
+                price: product.price || "",
+                downpayment: product.downpayment || "",
+                installment: product.installment || "",
+                tenure: product.tenure || "",
+                description: product.description || "",
+                companyName: product.companyName || "",
+                category: product.category || "",
+                productImages: product.productImages || [],
+                paymentPlans: [{ ...defaultPlan }],
+                productSpecifications: product.productSpecifications || { category: "", subCategory: "", specifications: [] }
+            }));
+        }
+    };
 
     // Helper to update nested path safely
     const updateForm = (path, value) => {
@@ -291,6 +359,33 @@ const CreateInstallment = () => {
         setLoading(true);
         setError(null);
         try {
+            // MULTI-VENDOR LOGIC: IF ADDING TO EXISTING PRODUCT
+            if (selectedProductId) {
+                const baseApi = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+                const token = localStorage.getItem('token'); // Check authContext token storage format, usually token
+                for (const plan of form.paymentPlans) {
+                    const planData = { ...plan };
+                    const res = await fetch(`${baseApi}/installment/${selectedProductId}/add-plan`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
+                        body: JSON.stringify(planData),
+                    });
+                    
+                    const data = await res.json();
+                    if (!data.success) {
+                        throw new Error(data.message || "Failed to append a payment plan.");
+                    }
+                }
+                const successMsg = "✓ Payment plans attached successfully!";
+                setMessage(successMsg);
+                showToast(successMsg, 'success');
+                setTimeout(() => navigate('/dashboard'), 1500);
+                return;
+            }
+
             const response = await createInstallmentPlan({
                 ...form,
                 category: form.category === "other" ? form.customCategory : form.category,
@@ -343,12 +438,33 @@ const CreateInstallment = () => {
                         {step === 1 && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-red-600 pl-4">Step 1: Basic Details</h2>
+
+                                <div className="bg-blue-50 border border-blue-200 rounded-[2rem] p-6">
+                                    <h3 className="text-lg font-black text-blue-800 mb-2">Multi-Vendor: Attach to Existing Product</h3>
+                                    <p className="text-sm text-blue-600 mb-4 font-medium">Select an existing product to attach your own payment plans. This will lock the product details.</p>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest pl-1">Select Product (Optional)</label>
+                                        <select
+                                            value={selectedProductId}
+                                            onChange={(e) => handleSelectExistingProduct(e.target.value)}
+                                            className="w-full px-5 py-4 bg-white border-2 border-blue-200 focus:border-blue-500 rounded-2xl text-sm font-semibold outline-none transition-all shadow-sm"
+                                        >
+                                            <option value="">-- Create New Product From Scratch --</option>
+                                            {existingProducts.map(p => (
+                                                <option key={p.installmentPlanId || p._id} value={p.installmentPlanId || p._id}>
+                                                    {p.productName} - PKR {p.price}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-4">
-                                        <InputField label="Product Name" value={form.productName} onChange={v => updateForm('productName', v)} placeholder="Full product title..." />
+                                        <InputField label="Product Name" value={form.productName} onChange={v => updateForm('productName', v)} placeholder="Full product title..." readOnly={!!selectedProductId} />
                                         <div className="grid grid-cols-2 gap-4">
-                                            <InputField label="City" value={form.city} onChange={v => updateForm('city', v)} />
-                                            <InputField label="Base Price (PKR)" type="number" value={form.price} onChange={v => updateForm('price', v)} />
+                                            <InputField label="City" value={form.city} onChange={v => updateForm('city', v)} readOnly={!!selectedProductId} />
+                                            <InputField label="Base Price (PKR)" type="number" value={form.price} onChange={v => updateForm('price', v)} readOnly={!!selectedProductId} />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="flex items-center gap-2 text-[10px] font-black text-gray-700 uppercase tracking-widest ml-1">
@@ -358,7 +474,8 @@ const CreateInstallment = () => {
                                             <select 
                                                 value={form.category} 
                                                 onChange={e => handleCategoryChange(e.target.value)} 
-                                                className="w-full px-5 py-4 bg-white border-2 border-gray-200 focus:border-red-500 focus:bg-red-50/30 hover:border-gray-300 rounded-2xl text-sm font-semibold outline-none transition-all appearance-none cursor-pointer shadow-sm focus:shadow-md"
+                                                disabled={!!selectedProductId}
+                                                className="w-full px-5 py-4 bg-white border-2 border-gray-200 focus:border-red-500 focus:bg-red-50/30 hover:border-gray-300 rounded-2xl text-sm font-semibold outline-none transition-all appearance-none cursor-pointer shadow-sm focus:shadow-md disabled:bg-gray-100 disabled:text-gray-500"
                                             >
                                                 <option value="">🔍 Select Product Category</option>
                                                 {Object.entries(getGroupedCategories()).map(([group, categories]) => (
@@ -383,10 +500,10 @@ const CreateInstallment = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <InputField label="Company / Brand" value={form.companyName} onChange={v => updateForm('companyName', v)} />
+                                        <InputField label="Company / Brand" value={form.companyName} onChange={v => updateForm('companyName', v)} readOnly={!!selectedProductId} />
                                         <div className="space-y-1.5">
                                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Description</label>
-                                            <textarea value={form.description} onChange={e => updateForm('description', e.target.value)} rows={4} className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-red-600 rounded-[2rem] text-sm font-bold outline-none transition-all resize-none shadow-inner" />
+                                            <textarea value={form.description} disabled={!!selectedProductId} onChange={e => updateForm('description', e.target.value)} rows={4} className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-red-600 rounded-[2rem] text-sm font-bold outline-none transition-all resize-none shadow-inner disabled:bg-gray-100 disabled:text-gray-500" />
                                         </div>
                                     </div>
                                 </div>
@@ -443,7 +560,8 @@ const CreateInstallment = () => {
                                                                 onChange={e => updateSpecification(spec.field, e.target.value)}
                                                                 placeholder={spec.placeholder || `Enter ${spec.field.toLowerCase()}`}
                                                                 required={spec.required}
-                                                                className="w-full px-4 py-3 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/30 hover:border-blue-300 rounded-xl text-sm font-semibold text-gray-700 transition-all outline-none shadow-sm focus:shadow-md"
+                                                                disabled={!!selectedProductId}
+                                                                className="w-full px-4 py-3 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/30 hover:border-blue-300 rounded-xl text-sm font-semibold text-gray-700 transition-all outline-none shadow-sm focus:shadow-md disabled:bg-gray-100 disabled:text-gray-500"
                                                             />
                                                         </div>
                                                     ) : spec.type === 'select' ? (
@@ -456,7 +574,8 @@ const CreateInstallment = () => {
                                                                 value={getSpecValue(spec.field)}
                                                                 onChange={e => updateSpecification(spec.field, e.target.value)}
                                                                 required={spec.required}
-                                                                className="w-full px-4 py-3 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/30 hover:border-blue-300 rounded-xl text-sm font-semibold text-gray-700 transition-all outline-none appearance-none cursor-pointer shadow-sm focus:shadow-md"
+                                                                disabled={!!selectedProductId}
+                                                                className="w-full px-4 py-3 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/30 hover:border-blue-300 rounded-xl text-sm font-semibold text-gray-700 transition-all outline-none appearance-none cursor-pointer shadow-sm focus:shadow-md disabled:bg-gray-100 disabled:text-gray-500"
                                                             >
                                                                 <option value="">Select {spec.field}</option>
                                                                 {spec.options?.map((option, i) => (
@@ -476,7 +595,8 @@ const CreateInstallment = () => {
                                                                 placeholder={spec.placeholder || `Enter ${spec.field.toLowerCase()}`}
                                                                 required={spec.required}
                                                                 rows={3}
-                                                                className="w-full px-4 py-3 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/30 hover:border-blue-300 rounded-xl text-sm font-semibold text-gray-700 transition-all outline-none resize-none shadow-sm focus:shadow-md"
+                                                                disabled={!!selectedProductId}
+                                                                className="w-full px-4 py-3 bg-white border-2 border-blue-200 focus:border-blue-500 focus:bg-blue-50/30 hover:border-blue-300 rounded-xl text-sm font-semibold text-gray-700 transition-all outline-none resize-none shadow-sm focus:shadow-md disabled:bg-gray-100 disabled:text-gray-500"
                                                             />
                                                         </div>
                                                     ) : null}
@@ -514,7 +634,9 @@ const CreateInstallment = () => {
                                             {form.productImages.map((url, i) => (
                                                 <div key={i} className="group relative aspect-square rounded-3xl overflow-hidden border-2 border-gray-100 shadow-sm">
                                                     <img src={url} className="w-full h-full object-cover" alt="" />
-                                                    <button onClick={() => updateForm('productImages', form.productImages.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-all font-black text-[10px]">REMOVE</button>
+                                                    {(!selectedProductId) && (
+                                                        <button onClick={() => updateForm('productImages', form.productImages.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-all font-black text-[10px]">REMOVE</button>
+                                                    )}
                                                 </div>
                                             ))}
                                             {localImages.map((file, i) => (
@@ -523,23 +645,27 @@ const CreateInstallment = () => {
                                                     <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping"></div></div>
                                                 </div>
                                             ))}
-                                            <label className="aspect-square rounded-3xl border-4 border-dashed border-gray-100 hover:border-red-600 hover:bg-red-50/30 transition-all flex flex-col items-center justify-center cursor-pointer group">
-                                                <input type="file" multiple className="hidden" onChange={handleFilesChange} />
-                                                <span className="text-3xl text-gray-200 group-hover:text-red-600 font-light">+</span>
-                                                <span className="text-[8px] font-black text-gray-300 group-hover:text-red-600 uppercase mt-2">Add Assets</span>
-                                            </label>
+                                            {(!selectedProductId) && (
+                                                <label className="aspect-square rounded-3xl border-4 border-dashed border-gray-100 hover:border-red-600 hover:bg-red-50/30 transition-all flex flex-col items-center justify-center cursor-pointer group">
+                                                    <input type="file" multiple className="hidden" onChange={handleFilesChange} />
+                                                    <span className="text-3xl text-gray-200 group-hover:text-red-600 font-light">+</span>
+                                                    <span className="text-[8px] font-black text-gray-300 group-hover:text-red-600 uppercase mt-2">Add Assets</span>
+                                                </label>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="bg-gray-900 rounded-[3rem] p-10 flex flex-col justify-center items-center text-center space-y-6 shadow-2xl">
-                                        <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.5)]">
-                                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                    {(!selectedProductId) && (
+                                        <div className="bg-gray-900 rounded-[3rem] p-10 flex flex-col justify-center items-center text-center space-y-6 shadow-2xl">
+                                            <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.5)]">
+                                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                            </div>
+                                            <h3 className="text-white font-black uppercase tracking-widest text-sm">Asset Processing Hub</h3>
+                                            <p className="text-gray-500 text-xs font-bold leading-relaxed">Ensure all images are high-resolution for the client interface.</p>
+                                            <button disabled={!localImages.length || uploading} onClick={handleUploadAll} className="w-full py-5 bg-white text-gray-900 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-red-600 hover:text-white transition-all disabled:opacity-20">
+                                                {uploading ? 'Processing Architecture...' : `Commit ${localImages.length} Local Files`}
+                                            </button>
                                         </div>
-                                        <h3 className="text-white font-black uppercase tracking-widest text-sm">Asset Processing Hub</h3>
-                                        <p className="text-gray-500 text-xs font-bold leading-relaxed">Ensure all images are high-resolution for the client interface.</p>
-                                        <button disabled={!localImages.length || uploading} onClick={handleUploadAll} className="w-full py-5 bg-white text-gray-900 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-red-600 hover:text-white transition-all disabled:opacity-20">
-                                            {uploading ? 'Processing Architecture...' : `Commit ${localImages.length} Local Files`}
-                                        </button>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -558,6 +684,35 @@ const CreateInstallment = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-6">
+                                    {/* Render Existing Plans (Read-Only) */}
+                                    {existingPlans.map((p, idx) => (
+                                        <div key={`ext-${idx}`} className="bg-gray-100/50 p-8 rounded-[2.5rem] border border-gray-200 relative group animate-in slide-in-from-right-4 duration-300 opacity-80">
+                                            <div className="absolute top-4 right-6 bg-gray-200 text-gray-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Existing Plan (Read-Only)</div>
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-2">
+                                                <InputField label="Plan Name" value={p.planName} onChange={() => {}} placeholder="e.g. Premium 12M" readOnly={true} />
+                                                <div className="space-y-2 group">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Interest Type</label>
+                                                    <select value={p.interestType} disabled className="w-full px-5 py-3.5 bg-gray-100 border-2 border-transparent rounded-2xl text-sm font-bold text-gray-500 cursor-not-allowed outline-none">
+                                                        <option>{p.interestType}</option>
+                                                    </select>
+                                                </div>
+                                                <InputField label="Duration (Months)" type="number" value={p.tenureMonths} onChange={() => {}} readOnly={true} />
+                                                <InputField label="Down Payment (PKR)" type="number" value={p.downPayment} onChange={() => {}} readOnly={true} />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                                <InputField label="Interest Rate / Markup" type="number" value={p.interestType === "Profit-Based (Islamic/Shariah)" ? p.markup : p.interestRatePercent} onChange={() => {}} readOnly={true} />
+                                                <InputField label={p.interestType === "Profit-Based (Islamic/Shariah)" ? "Markup Rate (Annual) %" : "Total Interest"} type="number" value={p.interestType === "Profit-Based (Islamic/Shariah)" ? p.interestRatePercent : p.markup} onChange={() => {}} readOnly={true} />
+                                            </div>
+                                            <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4 bg-white/50 p-6 rounded-3xl border border-gray-200">
+                                                <SummaryItem label="Monthly Installment (EMI)" value={p.monthlyInstallment} highlight />
+                                                <SummaryItem label="Total Markup Amount" value={p.markup} />
+                                                <SummaryItem label="Total Payable" value={p.installmentPrice} />
+                                                <SummaryItem label="Total Cost to Customer" value={p.totalCostToCustomer} highlight />
+                                                <SummaryItem label="Financed Amount" value={Math.max(0, (parseFloat(form.price) || 0) - (p.downPayment || 0))} border={false} />
+                                            </div>
+                                        </div>
+                                    ))}
+
                                     {form.paymentPlans.map((p, idx) => (
                                         <div key={idx} className="bg-gray-50/50 p-8 rounded-[2.5rem] border border-gray-100 relative group animate-in slide-in-from-right-4 duration-300">
                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
