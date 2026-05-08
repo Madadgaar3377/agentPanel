@@ -51,6 +51,7 @@ const Toast = ({ message, type, onClose }) => {
 
 const defaultPlan = {
     planName: "",
+    cashPrice: 0,
     installmentPrice: 0,
     downPayment: 0,
     monthlyInstallment: 0,
@@ -253,7 +254,7 @@ const CreateInstallment = () => {
             const pp = [...f.paymentPlans];
             const p = { ...pp[index] };
 
-            const cashPrice = Number(f.price) || 0;
+            const cashPrice = Number(p.cashPrice) || Number(f.price) || 0;
             const downPayment = Number(p.downPayment) || 0;
             const financedAmount = Math.max(0, cashPrice - downPayment);
             const months = parseInt(p.tenureMonths) || 0;
@@ -721,6 +722,13 @@ const CreateInstallment = () => {
                                                     pp[idx].planName = v;
                                                     setForm(f => ({ ...f, paymentPlans: pp }));
                                                 }} placeholder="e.g. Premium 12M" />
+
+                                                <InputField label="Partner Cash Price (PKR)" type="number" value={p.cashPrice} onChange={v => {
+                                                    const pp = [...form.paymentPlans];
+                                                    pp[idx].cashPrice = v;
+                                                    setForm(f => ({ ...f, paymentPlans: pp }));
+                                                    setTimeout(() => recalcPlan(idx), 0);
+                                                }} />
 
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-1">Markup Type</label>
