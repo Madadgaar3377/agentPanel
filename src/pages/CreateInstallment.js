@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { createInstallmentPlan, uploadImage } from '../services/installmentService';
 import { PRODUCT_CATEGORIES, CATEGORY_SPECIFICATIONS, getGroupedCategories } from '../constants/productCategories';
 import RichTextEditor from '../components/RichTextEditor';
+import SearchableProductSelect from '../components/SearchableProductSelect';
 
 // Toast Notification Component - Enhanced
 const Toast = ({ message, type, onClose }) => {
@@ -576,19 +577,14 @@ const CreateInstallment = () => {
                                     <h3 className="text-lg font-black text-blue-800 mb-2">Multi-Vendor: Attach to Existing Product</h3>
                                     <p className="text-sm text-blue-600 mb-4 font-medium">Select an existing product to attach your own payment plans. This will lock the product details.</p>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest pl-1">Select Product (Optional)</label>
-                                        <select
+                                        <label className="text-[10px] font-black text-gray-700 uppercase tracking-widest pl-1">Find existing product (optional)</label>
+                                        <SearchableProductSelect
+                                            products={existingProducts}
                                             value={selectedProductId}
-                                            onChange={(e) => handleSelectExistingProduct(e.target.value)}
-                                            className="w-full px-5 py-4 bg-white border-2 border-blue-200 focus:border-blue-500 rounded-2xl text-sm font-semibold outline-none transition-all shadow-sm"
-                                        >
-                                            <option value="">-- Create New Product From Scratch --</option>
-                                            {existingProducts.map(p => (
-                                                <option key={p.installmentPlanId || p._id} value={p.installmentPlanId || p._id}>
-                                                    {p.productName} - PKR {p.price}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={handleSelectExistingProduct}
+                                            placeholder="Type to search — e.g. Samsung, Lahore..."
+                                            createNewLabel="-- Create new product from scratch --"
+                                        />
                                     </div>
                                 </div>
 
