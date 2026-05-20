@@ -4,6 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { getInstallmentById, updateInstallmentPlan, uploadImage } from '../services/installmentService';
 import { PRODUCT_CATEGORIES, CATEGORY_SPECIFICATIONS, getGroupedCategories } from '../constants/productCategories';
 import RichTextEditor from '../components/RichTextEditor';
+import {
+    isAttachedMultiVendor,
+    filterPlansForEditor,
+    mapVariantsForEditor,
+    processPlansForForm,
+    buildInstallmentUpdateBody,
+} from '../utils/installmentPlanEditor';
 
 // Toast Notification Component - Enhanced
 const Toast = ({ message, type, onClose }) => {
@@ -94,6 +101,8 @@ const InstallmentEdit = () => {
     const [error, setError] = useState(null);
     const [toast, setToast] = useState(null);
     const [localImages, setLocalImages] = useState([]);
+    const [productOwnerUserId, setProductOwnerUserId] = useState("");
+    const [isAttachedProduct, setIsAttachedProduct] = useState(false);
 
     const showToast = (message, type) => {
         setToast({ message, type });
@@ -151,23 +160,27 @@ const InstallmentEdit = () => {
                     };
                 }
                 
-                // Process payment plans to add hasFinance flag
-                const processedPaymentPlans = plan.paymentPlans && plan.paymentPlans.length > 0 
-                    ? plan.paymentPlans.map(pp => ({
-                        ...pp,
-                        hasFinance: !!(pp.finance && (pp.finance.bankName || pp.finance.financeInfo)),
-                        finance: pp.finance || { bankName: "", financeInfo: "" }
-                    }))
-                    : [{ ...defaultPlan }];
+                const agentId = user?.userId || "";
+                const ownerId = plan.userId || "";
+                setProductOwnerUserId(ownerId);
+                setIsAttachedProduct(isAttachedMultiVendor(agentId, ownerId));
+
+                const myPlans = filterPlansForEditor(plan.paymentPlans, agentId, ownerId);
+                const myVariants = mapVariantsForEditor(plan.variants, agentId, ownerId);
+                const processedPaymentPlans =
+                    myPlans.length > 0
+                        ? processPlansForForm(myPlans)
+                        : [{ ...defaultPlan }];
 
                 setForm(prev => ({
                     ...prev,
                     ...plan,
+                    userId: agentId || prev.userId,
                     price: plan.price?.toString() || "",
                     downpayment: plan.downpayment?.toString() || "",
                     productSpecifications: plan.productSpecifications || prev.productSpecifications,
                     paymentPlans: processedPaymentPlans,
-                    variants: plan.variants || [],
+                    variants: myVariants,
                 }));
             } else {
                 const errorMsg = "Plan not found.";
@@ -380,36 +393,18 @@ const InstallmentEdit = () => {
         setLoading(true);
         setError(null);
         try {
-            const productPrice = deriveProductPrice(form.variants, form.price);
-            const response = await updateInstallmentPlan(id, {
-                ...form,
-                category: form.category === "other" ? form.customCategory : form.category,
-                price: productPrice,
-                downpayment: Number(form.downpayment),
-                variants: form.variants.map((v, vIdx) => ({
-                    ...v,
-                    price: Number(v.price),
-                    discountPercent: Number(v.discountPercent) || 0,
-                    paymentPlans: form.paymentPlans
-                        .filter(p => p.variantIndex === vIdx)
-                        .map(p => ({
-                            ...p,
-                            cashPrice: getVariantEffectivePrice(v),
-                            installmentPrice: Number(p.installmentPrice),
-                            downPayment: Number(p.downPayment),
-                            monthlyInstallment: Number(p.monthlyInstallment),
-                        })),
-                })),
-                paymentPlans: form.paymentPlans
-                    .filter(p => p.variantIndex === null || p.variantIndex === undefined || p.variantIndex === -1)
-                    .map(p => ({
-                        ...p,
-                        cashPrice: Number(p.cashPrice) || productPrice,
-                        installmentPrice: Number(p.installmentPrice),
-                        downPayment: Number(p.downPayment),
-                        monthlyInstallment: Number(p.monthlyInstallment),
-                    })),
+            const agentId = form.userId || user?.userId || "";
+            const body = buildInstallmentUpdateBody({
+                form,
+                editorUserId: agentId,
+                isAttachedProduct,
+                includeFullForm: !isAttachedProduct,
+                getVariantEffectivePrice,
             });
+            if (!isAttachedProduct) {
+                body.price = deriveProductPrice(form.variants, form.price);
+            }
+            const response = await updateInstallmentPlan(id, body);
             
             if (response.success) {
                 const successMsg = "✓ Installment plan updated successfully!";
@@ -455,6 +450,12 @@ const InstallmentEdit = () => {
 
                 {message && <div className="p-4 bg-emerald-50 border-2 border-emerald-100 text-emerald-600 rounded-2xl font-bold animate-pulse">{message}</div>}
                 {error && <div className="p-4 bg-red-50 border-2 border-red-100 text-red-600 rounded-2xl font-bold">{error}</div>}
+
+                {isAttachedProduct && (
+                    <p className="text-sm text-blue-800 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-3 font-medium">
+                        Shared catalog product: you are editing <strong>only your payment plans</strong>. Other companies&apos; plans stay unchanged.
+                    </p>
+                )}
 
                 <div className="bg-white rounded-[3rem] shadow-xl border border-gray-50 overflow-hidden min-h-[600px] flex flex-col">
                     <div className="p-10 flex-1">
