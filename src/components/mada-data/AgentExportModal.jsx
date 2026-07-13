@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { startAgentExport, getAgentExportJobStatus, AGENT_EXPORT_TYPES, CASE_CATEGORY_OPTIONS } from '../../services/madaDataApi';
+import { startAgentExport, getAgentExportJobStatus, downloadAgentJobFile, AGENT_EXPORT_TYPES, CASE_CATEGORY_OPTIONS } from '../../services/madaDataApi';
 
 const AgentExportModal = ({ onClose, defaultExportType = 'cases' }) => {
   const [exportType, setExportType] = useState(defaultExportType);
@@ -32,8 +32,11 @@ const AgentExportModal = ({ onClose, defaultExportType = 'cases' }) => {
           if (job.status === 'completed') {
             clearInterval(interval);
             setLoading(false);
-            setStatus('Download ready');
-            if (job.resultFileUrl) window.open(job.resultFileUrl, '_blank');
+            setStatus('Downloading…');
+            if (job.hasDownload) {
+              await downloadAgentJobFile(jobId, `madadgaar-${exportType}-export.xlsx`);
+              setStatus('Download complete (removed from server storage)');
+            }
           } else if (job.status === 'failed') {
             clearInterval(interval);
             setLoading(false);

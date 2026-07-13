@@ -71,7 +71,6 @@ export const buildAgentInstallmentUpdateBody = (form) => {
     clearDiscounts,
   });
   const validPlans = cashOnly ? [] : filterValidPaymentPlans(form.paymentPlans || []);
-  const explicitPrice = roundPKR(form.price);
 
   const paymentPlans = validPlans
     .filter(

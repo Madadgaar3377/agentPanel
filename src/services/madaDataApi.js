@@ -33,6 +33,24 @@ export const getAgentExportJobStatus = async (jobId) => {
   return data.data;
 };
 
+export const downloadAgentJobFile = async (jobId, filename) => {
+  const token = getAgentToken();
+  const res = await fetch(`${API_BASE}/mada-data/jobs/${jobId}/download`, {
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Download failed");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `madadgaar-${jobId}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 export const AGENT_EXPORT_TYPES = [
   { value: "finance", label: "Finance & commissions" },
   { value: "cases", label: "Cases & track record" },
