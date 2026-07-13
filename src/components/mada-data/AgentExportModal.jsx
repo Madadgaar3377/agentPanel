@@ -35,7 +35,7 @@ const AgentExportModal = ({ onClose, defaultExportType = 'cases' }) => {
             setStatus('Downloading…');
             if (job.hasDownload) {
               await downloadAgentJobFile(jobId, `madadgaar-${exportType}-export.xlsx`);
-              setStatus('Download complete (removed from server storage)');
+              setStatus('Download complete ');
             }
           } else if (job.status === 'failed') {
             clearInterval(interval);
