@@ -4,6 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import { getInstallmentById, updateInstallmentPlan, uploadImage } from '../services/installmentService';
 import { PRODUCT_CATEGORIES, CATEGORY_SPECIFICATIONS, getGroupedCategories } from '../constants/productCategories';
 import RichTextEditor from '../components/RichTextEditor';
+import {
+    hasProductFinance,
+    isFinanceOnlyStep,
+} from '../utils/installmentFinanceUtils';
+import {
+    buildAgentInstallmentUpdateBody,
+    roundPKR,
+} from '../utils/installmentPlanEditor';
 
 // Toast Notification Component - Enhanced
 const Toast = ({ message, type, onClose }) => {
@@ -78,6 +86,7 @@ const InstallmentEdit = () => {
     const [error, setError] = useState(null);
     const [toast, setToast] = useState(null);
     const [localImages, setLocalImages] = useState([]);
+    const [step4Tab, setStep4Tab] = useState('installments');
 
     const showToast = (message, type) => {
         setToast({ message, type });
@@ -101,7 +110,7 @@ const InstallmentEdit = () => {
         customCategory: "",
         status: "pending",
         productImages: [],
-        paymentPlans: [{ ...defaultPlan }],
+        paymentPlans: [],
 
         // New dynamic product specifications
         productSpecifications: {
@@ -109,6 +118,7 @@ const InstallmentEdit = () => {
             subCategory: "",
             specifications: []
         },
+        finance: { bankName: "", financeInfo: "" },
     });
 
     const fetchExistingPlan = useCallback(async () => {
@@ -141,7 +151,7 @@ const InstallmentEdit = () => {
                         hasFinance: !!(pp.finance && (pp.finance.bankName || pp.finance.financeInfo)),
                         finance: pp.finance || { bankName: "", financeInfo: "" }
                     }))
-                    : [{ ...defaultPlan }];
+                    : [];
 
                 setForm(prev => ({
                     ...prev,
@@ -150,7 +160,11 @@ const InstallmentEdit = () => {
                     downpayment: plan.downpayment?.toString() || "",
                     productSpecifications: plan.productSpecifications || prev.productSpecifications,
                     paymentPlans: processedPaymentPlans,
+                    finance: plan.finance || { bankName: "", financeInfo: "" },
                 }));
+                if (hasProductFinance(plan.finance) && (!plan.paymentPlans || plan.paymentPlans.length === 0)) {
+                    setStep4Tab('finance');
+                }
             } else {
                 const errorMsg = "Plan not found.";
                 setError(errorMsg);
@@ -252,8 +266,8 @@ const InstallmentEdit = () => {
             const pp = [...f.paymentPlans];
             const p = { ...pp[index] };
 
-            const cashPrice = Number(f.price) || 0;
-            const downPayment = Number(p.downPayment) || 0;
+            const cashPrice = roundPKR(f.price);
+            const downPayment = roundPKR(p.downPayment);
             const financedAmount = Math.max(0, cashPrice - downPayment);
             const months = parseInt(p.tenureMonths) || 0;
             const isIslamic = p.interestType === "Profit-Based (Islamic/Shariah)";
@@ -286,23 +300,18 @@ const InstallmentEdit = () => {
 
             pp[index] = {
                 ...p,
+                cashPrice,
                 interestRatePercent: Number(rate.toFixed(2)),
-                markup: Number(totalMarkup.toFixed(2)),
-                monthlyInstallment: Number(monthly.toFixed(2)),
-                installmentPrice: Number(totalPayable.toFixed(2)),
-                totalInterest: Number(totalMarkup.toFixed(2)),
-                totalCostToCustomer: Number(totalCostToCustomer.toFixed(2)),
+                markup: roundPKR(totalMarkup),
+                monthlyInstallment: roundPKR(monthly),
+                installmentPrice: roundPKR(totalPayable),
+                totalInterest: roundPKR(totalMarkup),
+                totalCostToCustomer: roundPKR(totalCostToCustomer),
             };
 
             return { ...f, paymentPlans: pp };
         });
     };
-
-    useEffect(() => {
-        if (form.paymentPlans.length) {
-            form.paymentPlans.forEach((_, idx) => recalcPlan(idx));
-        }
-    }, [form.price]);
 
     // --- Image Handling ---
     const handleFilesChange = (e) => {
@@ -357,12 +366,44 @@ const InstallmentEdit = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await updateInstallmentPlan(id, {
-                ...form,
-                category: form.category === "other" ? form.customCategory : form.category,
-                price: Number(form.price),
-                downpayment: Number(form.downpayment),
-            });
+            if (isFinanceOnlyStep(step4Tab)) {
+                if (!hasProductFinance(form.finance)) {
+                    const errorMsg = "Add bank name or finance information before saving.";
+                    setError(errorMsg);
+                    showToast(errorMsg, 'error');
+                    setLoading(false);
+                    return;
+                }
+
+                const response = await updateInstallmentPlan(id, {
+                    userId: user?.userId || form.userId,
+                    mergePartnerPlans: true,
+                    finance: form.finance || {},
+                    productName: form.productName,
+                    city: form.city,
+                    description: form.description || "",
+                    companyName: form.companyName || "",
+                    category: form.category === "other" ? form.customCategory : form.category,
+                    videoUrl: form.videoUrl || "",
+                    productImages: form.productImages || [],
+                    productSpecifications: form.productSpecifications || {},
+                    status: form.status || "pending",
+                });
+
+                if (response.success) {
+                    const successMsg = "✓ Finance information saved successfully!";
+                    setMessage(successMsg);
+                    showToast(successMsg, 'success');
+                    setTimeout(() => navigate('/installments/list'), 1500);
+                } else {
+                    const errorMsg = response.message || "Failed to save finance information.";
+                    setError(errorMsg);
+                    showToast(errorMsg, 'error');
+                }
+                return;
+            }
+
+            const response = await updateInstallmentPlan(id, buildAgentInstallmentUpdateBody(form));
             
             if (response.success) {
                 const successMsg = "✓ Installment plan updated successfully!";
@@ -617,8 +658,11 @@ const InstallmentEdit = () => {
 
                         {step === 4 && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-red-600 pl-4">Step 4: Financial </h2>
+                                <div className="flex justify-between items-center flex-wrap gap-4">
+                                    <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight border-l-8 border-red-600 pl-4">
+                                        {isFinanceOnlyStep(step4Tab) ? "Step 4: Bank Finance" : "Step 4: Financial"}
+                                    </h2>
+                                    {!isFinanceOnlyStep(step4Tab) && (
                                     <div className="flex items-center gap-4 bg-gray-900 px-6 py-3 rounded-2xl shadow-lg border border-gray-800">
                                         <div className="flex flex-col">
                                             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Global Cash Price</span>
@@ -627,7 +671,55 @@ const InstallmentEdit = () => {
                                         <div className="h-8 w-[1px] bg-gray-700 mx-2"></div>
                                         <button onClick={() => setForm(f => ({ ...f, paymentPlans: [...f.paymentPlans, { ...defaultPlan }] }))} className="px-5 py-2.5 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-red-200 hover:scale-105 active:scale-95 transition-all">+ Add Logic Tier</button>
                                     </div>
+                                    )}
                                 </div>
+
+                                <div className="flex gap-4 bg-white rounded-2xl p-2 shadow-sm border border-gray-200">
+                                    {[
+                                        { id: 'finance', label: '💰 Finance' },
+                                        { id: 'installments', label: '📊 Installments' },
+                                        { id: 'both', label: '🔄 Both' },
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            type="button"
+                                            onClick={() => setStep4Tab(tab.id)}
+                                            className={`flex-1 px-6 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all duration-300 ${
+                                                step4Tab === tab.id
+                                                    ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-200 scale-105'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {(step4Tab === 'finance' || step4Tab === 'both') && (
+                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[2rem] p-8 border-2 border-blue-200">
+                                        <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight mb-2">Finance Information</h3>
+                                        {isFinanceOnlyStep(step4Tab) && (
+                                            <p className="text-sm text-blue-800 font-medium mb-6">
+                                                Bank finance only — cash price and installment plans are not required.
+                                            </p>
+                                        )}
+                                        <div className="space-y-6">
+                                            <InputField label="Bank Name" value={form.finance?.bankName || ''} onChange={v => updateForm('finance.bankName', v)} placeholder="e.g. HBL, UBL, Meezan Bank" />
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Finance Information</label>
+                                                <div className="border-2 border-transparent rounded-2xl bg-white focus-within:border-red-600 transition-all shadow-sm">
+                                                    <RichTextEditor
+                                                        value={form.finance?.financeInfo || ''}
+                                                        onChange={(html) => updateForm('finance.financeInfo', html)}
+                                                        placeholder="Terms, eligibility, conditions..."
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {(step4Tab === 'installments' || step4Tab === 'both') && (
                                 <div className="space-y-6">
                                     {form.paymentPlans.map((p, idx) => (
                                         <div key={idx} className="bg-gray-50/50 p-8 rounded-[2.5rem] border border-gray-100 relative group animate-in slide-in-from-right-4 duration-300">
@@ -762,6 +854,7 @@ const InstallmentEdit = () => {
                                         </div>
                                     ))}
                                 </div>
+                                )}
                             </div>
                         )}
                     </div>

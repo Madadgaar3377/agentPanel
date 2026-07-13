@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
+import AgentExportModal from '../components/mada-data/AgentExportModal';
 
 const CasesList = () => {
   const [cases, setCases] = useState([]);
@@ -15,6 +16,7 @@ const CasesList = () => {
   });
   const [pagination, setPagination] = useState({});
   const [stats, setStats] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const fetchCases = useCallback(async () => {
     try {
@@ -100,14 +102,24 @@ const CasesList = () => {
   }
 
   return (
+    <>
     <div className="page-container">
       <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
             <h1 className="text-3xl font-bold text-gray-900">My Assignments</h1>
             <p className="mt-2 text-sm text-gray-600">
               Manage and track your assigned applications
             </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowExportModal(true)}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 text-sm"
+            >
+              Download records
+            </button>
           </div>
 
           {/* Stats Cards */}
@@ -313,6 +325,11 @@ const CasesList = () => {
           )}
         </div>
       </div>
+
+      {showExportModal && (
+        <AgentExportModal defaultExportType="cases" onClose={() => setShowExportModal(false)} />
+      )}
+    </>
   );
 };
 

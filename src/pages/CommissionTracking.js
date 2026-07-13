@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import AgentExportModal from "../components/mada-data/AgentExportModal";
 
 const API_BASE_URL = "https://api.madadgaar.com.pk/api";
 
@@ -16,6 +17,7 @@ const CommissionTracking = () => {
   const [totalEarned, setTotalEarned] = useState(0);
   const [totalPending, setTotalPending] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const fetchAssignments = useCallback(async () => {
     try {
@@ -110,11 +112,20 @@ const CommissionTracking = () => {
 
   return (
     <div className="page-container">
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
             Commission Tracking
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">View your commission earnings and status</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowExportModal(true)}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 text-sm shrink-0"
+          >
+            Download records
+          </button>
         </div>
 
         {/* Summary Cards */}
@@ -344,6 +355,10 @@ const CommissionTracking = () => {
           </table>
         </div>
       </div>
+
+      {showExportModal && (
+        <AgentExportModal defaultExportType="finance" onClose={() => setShowExportModal(false)} />
+      )}
     </div>
   );
 };
