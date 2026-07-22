@@ -77,7 +77,7 @@ const LinkedPartners = () => {
                     <p className="text-sm text-gray-600">📞 {item.phoneNumber}</p>
                   )}
                   <p className="text-xs text-gray-400 mt-1">
-                    Linked on {item.addedAt ? new Date(item.addedAt).toLocaleDateString() : "—"}
+                    Linked on {item.addedAt ? new Date(item.addedAt).toLocaleDateString() : ""}
                   </p>
                 </div>
                 <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium">

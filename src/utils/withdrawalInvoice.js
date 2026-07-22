@@ -3,14 +3,14 @@
  * Opens in a new window so user can print or Save as PDF.
  */
 const formatDate = (dateStr) => {
-  if (!dateStr) return "—";
+  if (!dateStr) return "";
   try {
     return new Date(dateStr).toLocaleString("en-PK", {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return "";
   }
 };
 
@@ -87,8 +87,8 @@ function getOneInvoiceBody(request, agent = {}) {
       </div>
       <div>
         <div class="section-title">Bank details</div>
-        <div>${escapeHtml(request.bankName || "—")}</div>
-        <div>${escapeHtml(request.bankAccountName || "—")}</div>
+        <div>${escapeHtml(request.bankName || "")}</div>
+        <div>${escapeHtml(request.bankAccountName || "")}</div>
         <div>Account: ****${escapeHtml(String(request.bankAccountNumber || "").slice(-4))}</div>
       </div>
     </div>

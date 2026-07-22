@@ -175,15 +175,19 @@ const CreateInstallment = () => {
         return spec ? spec.value : '';
     };
 
-    // --- Calculation Logic ---
+    // --- Calculation Logic (same formulas as partner/admin panels) ---
+    const roundPKR = (value) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return 0;
+        return Math.round(n);
+    };
+
     const amortizedMonthlyPayment = (principal, annualInterestPercent, months) => {
         if (!months || months <= 0) return 0;
         const r = Number(annualInterestPercent) / 100 / 12;
         if (!r) return principal / months;
-        const monthly = (principal * r) / (1 - Math.pow(1 + r, -months));
-        return monthly;
+        return (principal * r) / (1 - Math.pow(1 + r, -months));
     };
-
 
     const recalcPlan = (index) => {
         setForm(f => {
@@ -191,10 +195,10 @@ const CreateInstallment = () => {
             const pp = [...f.paymentPlans];
             const p = { ...pp[index] };
 
-            const cashPrice = Number(f.price) || 0;
-            const downPayment = Number(p.downPayment) || 0;
+            const cashPrice = roundPKR(f.price);
+            const downPayment = roundPKR(p.downPayment);
             const financedAmount = Math.max(0, cashPrice - downPayment);
-            const months = parseInt(p.tenureMonths) || 0;
+            const months = parseInt(p.tenureMonths, 10) || 0;
             const isIslamic = p.interestType === "Profit-Based (Islamic/Shariah)";
             const isReducing = p.interestType === "Reducing Balance";
 
@@ -204,18 +208,17 @@ const CreateInstallment = () => {
             let rate = Number(p.interestRatePercent) || 0;
 
             if (isIslamic) {
-                // Profit-Based (Islamic): Markup is input, Rate is derived
-                totalMarkup = Number(p.markup) || 0;
+                // Markup is input; rate auto; EMI on (financed + markup)
+                totalMarkup = roundPKR(p.markup);
                 rate = cashPrice > 0 ? (totalMarkup / cashPrice) * 100 : 0;
                 totalPayable = financedAmount + totalMarkup;
                 monthly = months > 0 ? totalPayable / months : 0;
             } else if (isReducing) {
-                // Reducing Balance: Rate is input, Monthly is amortized
                 monthly = amortizedMonthlyPayment(financedAmount, rate, months);
                 totalPayable = monthly * months;
                 totalMarkup = Math.max(0, totalPayable - financedAmount);
             } else {
-                // Flat Rate: Rate is input, Markup is (Financed * Rate * years)
+                // Flat: markup = financed * rate% * years
                 totalMarkup = financedAmount * (rate / 100) * (months / 12);
                 totalPayable = financedAmount + totalMarkup;
                 monthly = months > 0 ? totalPayable / months : 0;
@@ -225,12 +228,14 @@ const CreateInstallment = () => {
 
             pp[index] = {
                 ...p,
+                cashPrice,
+                financedAmount,
                 interestRatePercent: Number(rate.toFixed(2)),
-                markup: Number(totalMarkup.toFixed(2)),
-                monthlyInstallment: Number(monthly.toFixed(2)),
-                installmentPrice: Number(totalPayable.toFixed(2)),
-                totalInterest: Number(totalMarkup.toFixed(2)),
-                totalCostToCustomer: Number(totalCostToCustomer.toFixed(2)),
+                markup: roundPKR(totalMarkup),
+                monthlyInstallment: roundPKR(monthly),
+                installmentPrice: roundPKR(totalPayable),
+                totalInterest: roundPKR(totalMarkup),
+                totalCostToCustomer: roundPKR(totalCostToCustomer),
             };
 
             return { ...f, paymentPlans: pp };
@@ -627,7 +632,7 @@ const CreateInstallment = () => {
                                         <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight mb-2">Finance Information</h3>
                                         {isFinanceOnlyStep(step4Tab) && (
                                             <p className="text-sm text-blue-800 font-medium mb-6">
-                                                Bank finance only — cash price and installment plans are not required.
+                                                Bank finance only  cash price and installment plans are not required.
                                             </p>
                                         )}
                                         <div className="space-y-6">
@@ -775,7 +780,7 @@ const CreateInstallment = () => {
                                                 <SummaryItem label="Total Markup Amount" value={p.markup} />
                                                 <SummaryItem label="Total Payable" value={p.installmentPrice} />
                                                 <SummaryItem label="Total Cost to Customer" value={p.totalCostToCustomer} highlight />
-                                                <SummaryItem label="Financed Amount" value={Math.max(0, (parseFloat(form.price) || 0) - (p.downPayment || 0))} border={false} />
+                                                <SummaryItem label="Financed Amount" value={p.financedAmount != null ? p.financedAmount : Math.max(0, (parseFloat(form.price) || 0) - (p.downPayment || 0))} border={false} />
                                             </div>
                                             {form.paymentPlans.length > 1 && <button onClick={() => setForm(f => ({ ...f, paymentPlans: f.paymentPlans.filter((_, i) => i !== idx) }))} className="absolute top-4 right-4 text-gray-300 hover:text-red-600 transition-colors">✕</button>}
                                         </div>
